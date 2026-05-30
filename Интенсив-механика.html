@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр по физике</title>
+
+    <!-- Настройка MathJax для идеального рендера формул -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)']] },
+            chtml: { scale: 1.1 }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a; /* Более тёмный и контрастный цвет текста */
+            --correct-color: #10b981;
+            --wrong-color: #ef4444;
+        }
+
+        body {
+            /* Используем более плотный и читаемый шрифт */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 500; /* Делаем текст менее тонким */
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.7; /* Увеличили межстрочный интервал для легкого чтения */
+            font-size: 1.05rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 800;
+        }
+
+        .task-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        .task-header {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+            color: var(--primary-color);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        .task-text {
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            margin: 20px 0;
+            text-align: center;
+            background-color: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background-color: #f8fafc;
+            border: 2px solid #cbd5e1;
+            color: var(--text-main);
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .option-btn.selected {
+            background-color: #dbeafe;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-color) !important;
+            color: white !important;
+            border-color: var(--correct-color) !important;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color) !important;
+            color: white !important;
+            border-color: var(--wrong-color) !important;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 14px 24px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 700;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .check-btn {
+            background-color: var(--primary-color);
+        }
+
+        .check-btn:hover { background-color: var(--primary-hover); }
+        .check-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        .solution-toggle-btn {
+            background-color: #f59e0b;
+            display: none;
+        }
+
+        .solution-toggle-btn:hover { background-color: #d97706; }
+
+        .solution-box {
+            display: none;
+            margin-top: 24px;
+            background-color: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            padding: 24px;
+            border-radius: 8px;
+            color: #166534;
+        }
+
+        .solution-box.visible {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .solution-box h4 {
+            margin-top: 0;
+            color: #15803d;
+            margin-bottom: 16px;
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .svg-solution {
+            display: block;
+            margin: 20px auto;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #bbf7d0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 12px; font-size: 1rem; }
+            .task-card { padding: 18px; }
+            .options-grid { grid-template-columns: 1fr; }
+            .actions-group { flex-direction: column; }
+            .action-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Интенсив. Механика</h1>
+        <div id="tasks-container"></div>
+    </div>
+
+    <script>
+        // --- ВЕКТОРНЫЕ РИСУНКИ К ЗАДАЧАМ ---
+        const svg1 = `<svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:250px;">
+            <defs><marker id="arr1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#1f2937" /></marker></defs>
+            <polygon points="50,110 100,23.4 150,110" fill="none" stroke="#1f2937" stroke-width="1.5"/>
+            <text x="35" y="120" font-family="serif" font-style="italic">A</text><text x="95" y="15" font-family="serif" font-style="italic">B</text><text x="155" y="120" font-family="serif" font-style="italic">C</text>
+            <text x="60" y="70" font-family="serif" font-style="italic">a</text><text x="130" y="70" font-family="serif" font-style="italic">a</text><text x="95" y="100" font-family="serif" font-style="italic">a</text>
+            <line x1="30" y1="95" x2="70" y2="25" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr1)"/><line x1="130" y1="25" x2="170" y2="95" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr1)"/><line x1="130" y1="130" x2="70" y2="130" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr1)"/>
+            <text x="85" y="150" font-family="sans-serif" font-size="12">Рис. 1</text>
+        </svg>`;
+
+        const svg2 = `<svg viewBox="0 0 200 160" width="100%" height="160" style="max-width:250px;">
+            <defs><marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#1f2937" /></marker></defs>
+            <line x1="30" y1="130" x2="180" y2="40" stroke="#1f2937" stroke-width="1.2"/><line x1="120" y1="140" x2="150" y2="10" stroke="#1f2937" stroke-width="1.2"/>
+            <circle cx="55" cy="115" r="3" fill="#1f2937"/>
+            <line x1="55" y1="115" x2="90" y2="94" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr2)"/>
+            <text x="75" y="85" font-family="serif" font-style="italic">v<tspan baseline-shift="sub" font-size="0.7em">1</tspan></text>
+            <path d="M 75 72 L 83 72 L 80 69 M 83 72 L 80 75" stroke="#1f2937" fill="none" stroke-width="1"/>
+            <circle cx="120" cy="140" r="3" fill="#1f2937"/>
+            <line x1="120" y1="140" x2="129" y2="101" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr2)"/>
+            <text x="135" y="125" font-family="serif" font-style="italic">v<tspan baseline-shift="sub" font-size="0.7em">2</tspan></text>
+            <path d="M 135 112 L 143 112 L 140 109 M 143 112 L 140 115" stroke="#1f2937" fill="none" stroke-width="1"/>
+            <text x="100" y="155" font-family="sans-serif" font-size="12">Рис. 2</text>
+        </svg>`;
+
+        const svg3 = `<svg viewBox="0 0 300 200" width="100%" height="200" style="max-width:350px;">
+            <defs><marker id="arr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#1f2937" /></marker></defs>
+            <line x1="40" y1="180" x2="40" y2="10" stroke="#1f2937" stroke-width="1.2" marker-end="url(#arr3)"/><line x1="20" y1="90" x2="280" y2="90" stroke="#1f2937" stroke-width="1.2" marker-end="url(#arr3)"/>
+            <text x="10" y="15" font-family="serif" font-style="italic" font-size="14">v<tspan baseline-shift="sub" font-size="0.7em">x</tspan>, м/с</text><text x="275" y="110" font-family="serif" font-style="italic" font-size="14">t, с</text>
+            <text x="25" y="94" font-size="12">0</text><text x="25" y="70" font-size="12">2</text><text x="25" y="46" font-size="12">4</text><text x="20" y="118" font-size="12">-2</text><text x="20" y="142" font-size="12">-4</text><text x="20" y="166" font-size="12">-6</text>
+            <path d="M 37 66 h 6 M 37 42 h 6 M 37 114 h 6 M 37 138 h 6 M 37 162 h 6" stroke="#1f2937"/><path d="M 60 87 v 6 M 80 87 v 6 M 100 87 v 6 M 120 87 v 6 M 140 87 v 6 M 160 87 v 6 M 180 87 v 6 M 200 87 v 6 M 220 87 v 6 M 240 87 v 6" stroke="#1f2937"/>
+            <text x="56" y="110" font-size="12">1</text><text x="76" y="110" font-size="12">2</text><text x="96" y="110" font-size="12">3</text><text x="116" y="110" font-size="12">4</text><text x="136" y="110" font-size="12">5</text><text x="156" y="110" font-size="12">6</text><text x="176" y="110" font-size="12">7</text><text x="196" y="110" font-size="12">8</text><text x="216" y="110" font-size="12">9</text><text x="232" y="110" font-size="12">10</text>
+            <line x1="80" y1="90" x2="80" y2="42" stroke="#1f2937" stroke-dasharray="4,4"/><line x1="40" y1="42" x2="80" y2="42" stroke="#1f2937" stroke-dasharray="4,4"/><line x1="180" y1="90" x2="180" y2="162" stroke="#1f2937" stroke-dasharray="4,4"/><line x1="40" y1="162" x2="180" y2="162" stroke="#1f2937" stroke-dasharray="4,4"/>
+            <polyline points="40,90 80,42 120,90 180,162 240,90" fill="none" stroke="#1f2937" stroke-width="2"/>
+            <text x="140" y="195" font-family="sans-serif" font-size="12">Рис. 3</text>
+        </svg>`;
+
+        const svg4 = `<svg viewBox="0 0 160 160" width="100%" height="160" style="max-width:200px;">
+            <defs><marker id="arr4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#1f2937" /></marker></defs>
+            <circle cx="80" cy="80" r="60" fill="none" stroke="#1f2937" stroke-width="1.2"/>
+            <circle cx="80" cy="80" r="3" fill="#1f2937"/><text x="65" y="75" font-family="serif" font-style="italic" font-size="14">O</text>
+            <line x1="80" y1="80" x2="140" y2="80" stroke="#1f2937" stroke-width="1.2"/>
+            <circle cx="110" cy="80" r="3" fill="#1f2937"/><text x="106" y="70" font-size="12">1</text>
+            <circle cx="140" cy="80" r="3" fill="#1f2937"/><text x="144" y="70" font-size="12">2</text>
+            <path d="M 90 90 A 15 15 0 0 1 70 90" fill="none" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr4)"/>
+            <text x="65" y="155" font-family="sans-serif" font-size="12">Рис. 6</text>
+        </svg>`;
+
+        const svg5 = `<svg viewBox="0 0 280 180" width="100%" height="180" style="max-width:320px;">
+            <defs><marker id="arr6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#1f2937" /></marker></defs>
+            <line x1="50" y1="140" x2="50" y2="20" stroke="#1f2937" stroke-width="1.2" marker-end="url(#arr6)"/><line x1="30" y1="120" x2="260" y2="120" stroke="#1f2937" stroke-width="1.2" marker-end="url(#arr6)"/>
+            <text x="15" y="15" font-family="serif" font-style="italic" font-size="14">F<tspan baseline-shift="sub" font-size="0.7em">x</tspan>, Н</text><text x="255" y="140" font-family="serif" font-style="italic" font-size="14">t, с</text>
+            <text x="35" y="135" font-size="12">0</text><text x="25" y="85" font-size="12">2,0</text><text x="25" y="45" font-size="12">4,0</text>
+            <text x="90" y="140" font-size="12">1,0</text><text x="140" y="140" font-size="12">2,0</text><text x="190" y="140" font-size="12">3,0</text>
+            <path d="M 47 80 h 6 M 47 40 h 6" stroke="#1f2937"/><path d="M 100 117 v 6 M 150 117 v 6 M 200 117 v 6" stroke="#1f2937"/>
+            <line x1="100" y1="120" x2="100" y2="80" stroke="#1f2937" stroke-dasharray="4,4"/><line x1="50" y1="40" x2="150" y2="40" stroke="#1f2937" stroke-dasharray="4,4"/>
+            <line x1="150" y1="120" x2="150" y2="40" stroke="#1f2937" stroke-dasharray="4,4"/><line x1="200" y1="120" x2="200" y2="40" stroke="#1f2937" stroke-dasharray="4,4"/>
+            <polyline points="50,80 100,80 150,40 240,40" fill="none" stroke="#1f2937" stroke-width="2"/>
+            <text x="130" y="170" font-family="sans-serif" font-size="12">Рис. 3</text>
+        </svg>`;
+
+        // Доп. картинки для решений
+        const solSvgTask5 = `<svg class="svg-solution" viewBox="0 0 200 120" width="100%" height="100">
+            <defs><marker id="arrS1" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M 0 0 L 5 2.5 L 0 5 z" fill="#15803d"/></marker></defs>
+            <line x1="20" y1="90" x2="100" y2="90" stroke="#15803d" stroke-width="2" marker-end="url(#arrS1)"/><text x="60" y="105" fill="#15803d" font-family="serif" font-style="italic">v<tspan baseline-shift="sub" font-size="0.7em">1</tspan></text>
+            <line x1="20" y1="90" x2="80" y2="20" stroke="#15803d" stroke-width="2" marker-end="url(#arrS1)"/><text x="25" y="45" fill="#15803d" font-family="serif" font-style="italic">v<tspan baseline-shift="sub" font-size="0.7em">2</tspan></text>
+            <line x1="80" y1="20" x2="100" y2="90" stroke="#ef4444" stroke-width="2" marker-end="url(#arrS1)" stroke-dasharray="4 2"/><text x="95" y="55" fill="#ef4444" font-family="serif" font-style="italic">Δv</text>
+            <path d="M 40 90 A 20 20 0 0 0 35 73" fill="none" stroke="#15803d"/><text x="45" y="80" fill="#15803d" font-size="12">30°</text>
+        </svg>`;
+
+        const solSvgTask11 = `<svg class="svg-solution" viewBox="0 0 200 120" width="100%" height="120">
+            <defs><marker id="arrS2" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M 0 0 L 5 2.5 L 0 5 z" fill="#15803d"/></marker></defs>
+            <line x1="20" y1="100" x2="180" y2="100" stroke="#15803d" stroke-width="1.5"/>
+            <rect x="70" y="70" width="40" height="30" fill="#bbf7d0" stroke="#15803d" stroke-width="1.5"/>
+            <circle cx="90" cy="85" r="2" fill="#15803d"/>
+            <line x1="90" y1="85" x2="90" y2="120" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrS2)"/> <text x="95" y="115" fill="#15803d" font-size="12">mg</text>
+            <line x1="90" y1="70" x2="90" y2="30" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrS2)"/> <text x="95" y="40" fill="#15803d" font-size="12">N</text>
+            <line x1="90" y1="85" x2="150" y2="50" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrS2)"/> <text x="145" y="45" fill="#15803d" font-size="12">F</text>
+            <line x1="70" y1="85" x2="30" y2="85" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrS2)"/> <text x="35" y="75" fill="#15803d" font-size="12">F<tspan baseline-shift="sub" font-size="0.7em">тр</tspan></text>
+            <path d="M 120 85 A 30 30 0 0 0 115 70" fill="none" stroke="#15803d"/><text x="125" y="80" fill="#15803d" font-size="12">30°</text>
+            <line x1="90" y1="85" x2="130" y2="85" stroke="#15803d" stroke-dasharray="3 3"/>
+        </svg>`;
+
+        // БАЗА ДАННЫХ ЗАДАЧ И РЕШЕНИЙ
+        const tasks = [
+            {
+                text: "Материальная точка начала равномерное движение из точки \\(A\\) со скоростью, модуль которой \\(v = 10 \\text{ см/с}\\). Треугольник \\(ABC\\) — равносторонний со стороной \\(a = 1,0 \\text{ см}\\) (рис. 1). Пройденный точкой путь за промежуток времени \\(\\Delta t = 0,50 \\text{ с}\\) больше модуля перемещения за это же время:",
+                image: svg1,
+                options: ["в 2 раза", "в 3 раза", "в 4 раза", "в 5 раз", "в 8 раз"],
+                correct: 3,
+                solution: "Пройденный точкой путь равен произведению скорости на время:<br>$$ s = v \\cdot \\Delta t = 10 \\text{ см/с} \\cdot 0,50 \\text{ с} = 5 \\text{ см} $$<br>Поскольку сторона треугольника равна \\(1 \\text{ см}\\), точка пройдет ровно 5 сторон. Ее маршрут выглядит так: \\(A \\to B \\to C \\to A \\to B \\to C\\). Следовательно, она остановится в вершине \\(C\\).<br><br>Вектор перемещения направлен из начальной точки \\(A\\) в конечную \\(C\\), и его модуль равен длине стороны треугольника, то есть \\(1 \\text{ см}\\). Таким образом, пройденный путь больше модуля перемещения в вычисленное количество раз:<br>$$ \\frac{5 \\text{ см}}{1 \\text{ см}} = 5 \\text{ раз} $$"
+            },
+            {
+                text: "Комбайн убирает урожай с поля прямоугольной формы площадью \\(S = 21,6 \\text{ га}\\). Захват жатки комбайна \\(l = 6,0 \\text{ м}\\), средняя скорость движения комбайна \\(v = 7,2 \\text{ км/ч}\\). Промежуток времени, за который комбайн уберет урожай, составляет:",
+                image: null,
+                options: ["3,0 ч", "5,0 ч", "6,5 ч", "7,0 ч", "8,0 ч"],
+                correct: 1,
+                solution: "Переведем известные величины в систему СИ: площадь поля \\(S = 21,6 \\text{ га} = 216\\,000 \\text{ м}^2\\), а скорость комбайна \\(v = 7,2 \\text{ км/ч} = 2 \\text{ м/с}\\).<br><br>За одну секунду комбайн убирает площадь, равную произведению ширины захвата на скорость: \\(l \\cdot v\\). Чтобы найти общее время работы, необходимо всю площадь разделить на площадь, убираемую за одну секунду:<br>$$ t = \\frac{S}{l \\cdot v} = \\frac{216\\,000}{6,0 \\cdot 2} = 18\\,000 \\text{ с} $$<br>Переведя секунды в часы, получим искомый ответ:<br>$$ t = \\frac{18\\,000}{3600} = 5,0 \\text{ ч} $$"
+            },
+            {
+                text: "Первую треть пути велосипедист двигался со скоростью, модуль которой \\(v_1 = 5,0 \\text{ м/с}\\); вторую треть пути — со скоростью, модуль которой \\(v_2 = 10,8 \\text{ км/ч}\\); оставшийся отрезок пути велосипедист двигался со скоростью, модуль которой \\(v_3 = 7,0 \\text{ м/с}\\). Средняя скорость прохождения пути равна:",
+                image: null,
+                options: ["4,2 м/с", "4,4 м/с", "4,6 м/с", "4,8 м/с", "5,0 м/с"],
+                correct: 1,
+                solution: "Средняя скорость вычисляется как отношение всего пройденного пути ко всему затраченному времени:<br>$$ v_{\\text{ср}} = \\frac{S}{t_1 + t_2 + t_3} $$<br>Скорость на втором участке необходимо перевести в СИ: \\(v_2 = 10,8 \\text{ км/ч} = 3 \\text{ м/с}\\). Время прохождения каждой трети пути можно выразить как \\(t_i = \\frac{S/3}{v_i}\\). Подставим эти значения в исходную формулу:<br>$$ v_{\\text{ср}} = \\frac{S}{\\frac{S}{3 \\cdot 5} + \\frac{S}{3 \\cdot 3} + \\frac{S}{3 \\cdot 7}} = \\frac{1}{\\frac{1}{15} + \\frac{1}{9} + \\frac{1}{21}} $$<br>Приведя дроби к общему знаменателю (315), получаем ответ:<br>$$ v_{\\text{ср}} = \\frac{315}{21 + 35 + 15} = \\frac{315}{71} \\approx 4,43 \\text{ м/с} $$<br>Округляя, получаем \\(4,4 \\text{ м/с}\\)."
+            },
+            {
+                text: "Эскалатор метро поднимает стоящего на нем пассажира за промежуток времени \\(\\Delta t_1 = 180 \\text{ с}\\). Идущий по движущемуся эскалатору пассажир поднимается за \\(\\Delta t_2 = 120 \\text{ с}\\). По неподвижному эскалатору человек поднимается за промежуток времени, равный:",
+                image: null,
+                options: ["240 с", "300 с", "330 с", "360 с", "480 с"],
+                correct: 3,
+                solution: "Пусть \\(L\\) — длина эскалатора. Тогда скорость движения самого эскалатора равна \\(v_{\\text{э}} = \\frac{L}{180}\\).<br><br>Когда пассажир идет по движущемуся эскалатору, их скорости складываются: \\(v_{\\text{э}} + v_{\\text{п}} = \\frac{L}{120}\\). Выразим отсюда собственную скорость пассажира, с которой он идет:<br>$$ v_{\\text{п}} = \\frac{L}{120} - \\frac{L}{180} = \\frac{3L - 2L}{360} = \\frac{L}{360} $$<br>Время подъема по неподвижному эскалатору можно найти, разделив длину эскалатора на собственную скорость пассажира:<br>$$ t = \\frac{L}{v_{\\text{п}}} = \\frac{L}{\\frac{L}{360}} = 360 \\text{ с} $$"
+            },
+            {
+                text: "Два автомобиля приближаются к перекрестку по дорогам, угол между которыми \\(\\alpha = 30^\\circ\\) (рис. 2), со скоростями, модули которых \\(v_1 = 36 \\text{ км/ч}\\), \\(v_2 = 54 \\text{ км/ч}\\). Модуль скорости, с которой автомобили приближаются друг к другу, равен:",
+                image: svg2,
+                options: ["6,2 м/с", "8,1 м/с", "9,5 м/с", "10 м/с", "12 м/с"],
+                correct: 1,
+                solution: "Переведем скорости автомобилей в систему СИ: \\(v_1 = 10 \\text{ м/с}\\) и \\(v_2 = 15 \\text{ м/с}\\).<br><br>Модуль скорости, с которой они приближаются друг к другу — это модуль вектора относительной скорости \\(\\Delta \\vec{v} = \\vec{v}_1 - \\vec{v}_2\\). Поскольку оба автомобиля едут к перекрестку, при совмещении начал векторов угол между ними составит \\(30^\\circ\\)." + solSvgTask5 + "<br>Применяя теорему косинусов для разности векторов, получаем значение относительной скорости:<br>$$ \\Delta v = \\sqrt{v_1^2 + v_2^2 - 2v_1 v_2 \\cos 30^\\circ} $$<br>$$ \\Delta v = \\sqrt{100 + 225 - 2 \\cdot 10 \\cdot 15 \\cdot \\frac{\\sqrt{3}}{2}} = \\sqrt{325 - 150\\sqrt{3}} \\approx \\sqrt{65,2} \\approx 8,1 \\text{ м/с} $$"
+            },
+            {
+                text: "Автомобиль движется прямолинейно и равноускоренно и за промежуток времени \\(\\Delta t = 40 \\text{ с}\\) проходит путь \\(s = 800 \\text{ м}\\). Если модуль скорости автомобиля за это время увеличился в \\(k = 3\\) раза, то модуль ускорения автомобиля равен:",
+                image: null,
+                options: ["0,20 м/с²", "0,35 м/с²", "0,50 м/с²", "0,80 м/с²", "1,0 м/с²"],
+                correct: 2,
+                solution: "При равноускоренном движении пройденный путь можно выразить через начальную и конечную скорости без использования ускорения:<br>$$ s = \\frac{v_0 + v}{2} \\cdot \\Delta t $$<br>По условию конечная скорость в три раза больше начальной: \\(v = 3v_0\\). Подставим это в формулу пути:<br>$$ 800 = \\frac{v_0 + 3v_0}{2} \\cdot 40 \\implies 800 = 2v_0 \\cdot 40 $$<br>Из этого уравнения находим начальную скорость: \\(v_0 = 10 \\text{ м/с}\\). Значит, конечная скорость \\(v = 30 \\text{ м/с}\\).<br><br>Теперь можно найти ускорение автомобиля по классической формуле:<br>$$ a = \\frac{v - v_0}{\\Delta t} = \\frac{30 - 10}{40} = 0,50 \\text{ м/с}^2 $$"
+            },
+            {
+                text: "На рисунке 3 приведен график зависимости \\(v_x(t)\\), где \\(v_x\\) — проекция скорости точки на ось \\(Ox\\), а \\(t\\) — время. Модуль результирующего перемещения точки за промежуток времени \\(\\Delta t = 10 \\text{ с}\\) равен:",
+                image: svg3,
+                options: ["6 м", "8 м", "10 м", "12 м", "18 м"],
+                correct: 2,
+                solution: "Проекция перемещения численно равна алгебраической сумме площадей фигур под графиком зависимости скорости от времени (площадь ниже оси абсцисс берется со знаком минус).<br><br>Площадь верхнего треугольника (движение от 0 до 4 с) равна:<br>$$ S_1 = \\frac{1}{2} \\cdot 4 \\cdot 4 = 8 \\text{ м} $$<br>Площадь нижнего треугольника (движение в обратную сторону от 4 до 10 с) равна:<br>$$ S_2 = \\frac{1}{2} \\cdot 6 \\cdot (-6) = -18 \\text{ м} $$<br>Результирующее перемещение составляет \\(\\Delta x = 8 - 18 = -10 \\text{ м}\\).<br><br>Модуль перемещения берется по модулю и равен \\(|-10| = 10 \\text{ м}\\)."
+            },
+            {
+                text: "Автомобиль движется со скоростью, модуль которой \\(v = 36,0 \\text{ км/ч}\\). Диаметр колеса автомобиля \\(d = 80,0 \\text{ см}\\). Число оборотов колеса за промежуток времени \\(\\Delta t = 60,0 \\text{ с}\\) составляет:",
+                image: null,
+                options: ["60,0", "120", "239", "360", "480"],
+                correct: 2,
+                solution: "Переведем данные в СИ: скорость автомобиля \\(v = 10 \\text{ м/с}\\), а диаметр колеса \\(d = 0,8 \\text{ м}\\). За заданное время \\(\\Delta t = 60 \\text{ с}\\) автомобиль проедет путь:<br>$$ s = v \\cdot \\Delta t = 10 \\cdot 60 = 600 \\text{ м} $$<br>Длина окружности колеса (расстояние, которое проходит колесо за один полный оборот без проскальзывания) вычисляется как:<br>$$ C = \\pi \\cdot d = 3,14 \\cdot 0,8 \\approx 2,512 \\text{ м} $$<br>Чтобы найти число оборотов, нужно весь пройденный путь разделить на длину одного оборота:<br>$$ N = \\frac{s}{C} = \\frac{600}{2,512} \\approx 238,8 $$<br>Округляем полученное значение до целого числа оборотов: \\(239\\)."
+            },
+            {
+                text: "Модули линейных скоростей точек 1 и 2, расположенных на поверхности горизонтального диска, \\(v_1 = 6,4 \\text{ м/с}\\) и \\(v_2 = 11 \\text{ м/с}\\). Диск вращается с постоянной угловой скоростью \\(\\omega = 9,6 \\text{ рад/с}\\) вокруг неподвижной вертикальной оси, проходящей через его центр (рис. 6). Расстояние между точками 1 и 2 равно:",
+                image: svg4,
+                options: ["24 см", "36 см", "48 см", "56 см", "60 см"],
+                correct: 2,
+                solution: "Линейная скорость точки на вращающемся диске связана с его угловой скоростью формулой \\(v = \\omega R\\). Отсюда можно найти расстояния от центра вращения до каждой из точек:<br>$$ R_1 = \\frac{v_1}{\\omega} = \\frac{6,4}{9,6} = \\frac{2}{3} \\text{ м} $$<br>$$ R_2 = \\frac{v_2}{\\omega} = \\frac{11}{9,6} \\text{ м} $$<br>Поскольку обе точки лежат на одном радиусе (по рисунку они находятся на одной прямой по одну сторону от центра), расстояние между ними равно разности их радиусов от центра диска:<br>$$ \\Delta R = R_2 - R_1 = \\frac{11 - 6,4}{9,6} = \\frac{4,6}{9,6} \\approx 0,479 \\text{ м} $$<br>Переведем в сантиметры и округлим: получаем \\(48 \\text{ см}\\)."
+            },
+            {
+                text: "К невесомой нити подвешен груз массой \\(m = 2,0 \\text{ кг}\\). Если точку подвеса нити поднимать вертикально вверх с ускорением, модуль которого \\(a = 5,0 \\text{ м/с}^2\\), то модуль силы натяжения нити равен:",
+                image: null,
+                options: ["10 Н", "20 Н", "30 Н", "40 Н", "60 Н"],
+                correct: 2,
+                solution: "На груз действуют две силы: сила тяжести \\(m\\vec{g}\\), направленная вертикально вниз, и сила натяжения нити \\(\\vec{T}\\), направленная вертикально вверх.<br><br>Согласно второму закону Ньютона в проекции на вертикальную ось, направленную вверх, уравнение движения груза запишется так:<br>$$ T - mg = ma $$<br>Выразим отсюда модуль силы натяжения нити и подставим числовые значения:<br>$$ T = m(g + a) = 2,0 \\cdot (10 + 5,0) = 30 \\text{ Н} $$"
+            },
+            {
+                text: "Под действием силы, модуль которой \\(F = 30 \\text{ Н}\\), направленной под углом \\(\\alpha = 30^\\circ\\) к горизонту вверх, тело массой \\(m = 7,7 \\text{ кг}\\) движется с ускорением, модуль которого \\(a = 3,0 \\text{ м/с}^2\\). Коэффициент трения скольжения \\(\\mu\\) при движении тела равен:",
+                image: null,
+                options: ["0,023", "0,046", "0,056", "0,081", "0,096"],
+                correct: 1,
+                solution: "Распишем второй закон Ньютона. В проекции на горизонтальную ось:<br>$$ F \\cos \\alpha - F_{\\text{тр}} = ma $$<br>В проекции на вертикальную ось тело не движется, значит силы скомпенсированы:<br>$$ N + F \\sin \\alpha - mg = 0 $$<br>Отсюда сила нормальной реакции опоры \\(N = mg - F \\sin \\alpha\\). Обратите внимание, что тянущая сила направлена под углом вверх, поэтому она частично «приподнимает» тело, уменьшая давление на поверхность и силу трения." + solSvgTask11 + "<br>Сила трения скольжения пропорциональна реакции опоры: \\(F_{\\text{тр}} = \\mu N = \\mu(mg - F \\sin \\alpha)\\). Подставим это выражение в первое уравнение:<br>$$ F \\cos \\alpha - \\mu(mg - F \\sin \\alpha) = ma $$<br>Выразим и вычислим коэффициент трения \\(\\mu\\):<br>$$ \\mu = \\frac{F \\cos \\alpha - ma}{mg - F \\sin \\alpha} = \\frac{30 \\cdot \\frac{\\sqrt{3}}{2} - 7,7 \\cdot 3,0}{7,7 \\cdot 10 - 30 \\cdot 0,5} \\approx \\frac{25,98 - 23,1}{77 - 15} \\approx \\frac{2,88}{62} \\approx 0,046 $$"
+            },
+            {
+                text: "По наклонной плоскости высотой \\(h = 5,0 \\text{ м}\\) и основанием \\(b = 30 \\text{ м}\\) съезжают санки, которые останавливаются, проехав от основания горы горизонтальный участок длиной \\(l = 70 \\text{ м}\\). Если коэффициент трения \\(\\mu\\) одинаков на всем пути, то он равен:",
+                image: null,
+                options: ["0,020", "0,050", "0,080", "0,10", "0,12"],
+                correct: 1,
+                solution: "Удобнее всего решить эту задачу через закон сохранения энергии. Вся начальная потенциальная энергия санок полностью расходуется на совершение работы против сил трения на обоих участках пути (наклонном и горизонтальном):<br>$$ mgh = A_{\\text{тр1}} + A_{\\text{тр2}} $$<br>Работа силы трения на наклонной плоскости равна \\(\\mu mg \\cos \\alpha \\cdot s_{\\text{горы}}\\). Из геометрии треугольника известно, что произведение длины ската на косинус угла наклона равно длине основания горы \\(b\\) (то есть \\(s_{\\text{горы}} \\cdot \\cos \\alpha = b\\)). Таким образом, работа на горе равна \\(A_{\\text{тр1}} = \\mu mgb\\).<br><br>Работа силы трения на горизонтальном участке пути равна \\(A_{\\text{тр2}} = \\mu mgl\\). Подставим всё в уравнение энергии:<br>$$ mgh = \\mu mgb + \\mu mgl \\implies h = \\mu(b + l) $$<br>Отсюда выражаем и вычисляем коэффициент трения:<br>$$ \\mu = \\frac{h}{b + l} = \\frac{5,0}{30 + 70} = 0,050 $$"
+            },
+            {
+                text: "Шарик, подвешенный на невесомой нерастяжимой нити длиной \\(l = 29 \\text{ см}\\), равномерно вращается в горизонтальной плоскости (конический маятник). Если при вращении шарика нить отклонена от вертикали на угол \\(\\alpha = 30^\\circ\\), то период вращения шарика равен:",
+                image: null,
+                options: ["0,10 с", "0,25 с", "0,60 с", "0,80 с", "1,0 с"],
+                correct: 4,
+                solution: "Запишем второй закон Ньютона для шарика. По вертикальной оси шарик не перемещается, значит вертикальная проекция силы натяжения нити полностью уравновешивает силу тяжести: \\(T \\cos \\alpha = mg\\).<br><br>По горизонтали шарик равномерно движется по окружности. Возникающее центростремительное ускорение создается горизонтальной проекцией силы натяжения нити: \\(T \\sin \\alpha = m \\omega^2 R\\).<br><br>Разделив второе уравнение на первое, избавимся от массы и натяжения нити:<br>$$ \\operatorname{tg} \\alpha = \\frac{\\omega^2 R}{g} $$<br>Радиус окружности можно выразить через длину нити, рассмотрев прямоугольный треугольник отклонения: \\(R = l \\sin \\alpha\\). Подставив это, получим: \\(\\operatorname{tg} \\alpha = \\frac{\\omega^2 l \\sin \\alpha}{g}\\), откуда угловая скорость вращения \\(\\omega = \\sqrt{\\frac{g}{l \\cos \\alpha}}\\).<br><br>Период вращения связан с угловой скоростью соотношением \\(T_{\\text{пер}} = \\frac{2\\pi}{\\omega}\\), следовательно:<br>$$ T_{\\text{пер}} = 2\\pi \\sqrt{\\frac{l \\cos \\alpha}{g}} = 2 \\cdot 3,14 \\cdot \\sqrt{\\frac{0,29 \\cdot \\frac{\\sqrt{3}}{2}}{10}} \\approx 6,28 \\cdot \\sqrt{0,0251} \\approx 1,0 \\text{ с} $$"
+            },
+            {
+                text: "Два мальчика отталкиваются друг от друга и на гладком льду разъезжаются на коньках в разные стороны. Через промежуток времени \\(\\Delta t = 2,0 \\text{ с}\\) расстояние между ними становится \\(s = 10 \\text{ м}\\). Массы мальчиков \\(m_1 = 40 \\text{ кг}\\) и \\(m_2 = 60 \\text{ кг}\\). Модуль скорости более легкого мальчика равен:",
+                image: null,
+                options: ["1,0 м/с", "1,5 м/с", "3,0 м/с", "4,0 м/с", "5,0 м/с"],
+                correct: 2,
+                solution: "Так как поверхность льда гладкая (трением пренебрегаем), выполняется закон сохранения импульса. В начальный момент импульс системы был равен нулю, следовательно, векторы импульсов мальчиков после отталкивания равны по модулю и противоположны по направлению:<br>$$ m_1 v_1 = m_2 v_2 \\implies 40 v_1 = 60 v_2 \\implies v_1 = 1,5 v_2 $$<br>Относительная скорость разъезжающихся мальчиков равна сумме их модулей скоростей: \\(v_{\\text{отн}} = v_1 + v_2\\). С другой стороны, мы можем найти её как отношение пройденного ими совместно расстояния к затраченному времени:<br>$$ v_{\\text{отн}} = \\frac{s}{\\Delta t} = \\frac{10}{2,0} = 5 \\text{ м/с} $$<br>Подставим полученное ранее соотношение скоростей:<br>$$ 1,5 v_2 + v_2 = 5 \\implies 2,5 v_2 = 5 \\implies v_2 = 2 \\text{ м/с} $$<br>Тогда модуль скорости более легкого мальчика (массой 40 кг) равен:<br>$$ v_1 = 1,5 \\cdot 2 = 3,0 \\text{ м/с} $$"
+            },
+            {
+                text: "Подъемный кран поднимает с поверхности земли бетонную плиту массой \\(m = 200 \\text{ кг}\\) на высоту \\(h = 12 \\text{ м}\\) равноускорено за время \\(t = 1,8 \\text{ с}\\). Если КПД крана \\(\\eta = 60\\%\\), то средняя мощность \\(\\langle P \\rangle\\), развиваемая двигателем крана, составляет:",
+                image: null,
+                options: ["11 кВт", "13 кВт", "26 кВт", "39 кВт", "50 кВт"],
+                correct: 3,
+                solution: "Сначала найдем ускорение плиты из кинематического уравнения пути без начальной скорости \\(h = \\frac{at^2}{2}\\):<br>$$ a = \\frac{2h}{t^2} = \\frac{24}{1,8^2} = \\frac{24}{3,24} \\approx 7,41 \\text{ м/с}^2 $$<br>Сила натяжения троса, которую развивает кран для подъема, находится из второго закона Ньютона:<br>$$ F = m(g + a) = 200(10 + 7,41) = 3482 \\text{ Н} $$<br>Полезная механическая работа, совершенная краном по подъему этой плиты:<br>$$ A_{\\text{пол}} = F \\cdot h = 3482 \\cdot 12 = 41784 \\text{ Дж} $$<br>Средняя полезная мощность крана:<br>$$ P_{\\text{пол}} = \\frac{A_{\\text{пол}}}{t} = \\frac{41784}{1,8} \\approx 23213 \\text{ Вт} $$<br>Учитывая КПД установки, найдем полную (затрачиваемую) мощность двигателя:<br>$$ P_{\\text{затр}} = \\frac{P_{\\text{пол}}}{\\eta} = \\frac{23213}{0,60} \\approx 38688 \\text{ Вт} \\approx 39 \\text{ кВт} $$"
+            },
+            {
+                text: "Груз массой \\(m = 100 \\text{ кг}\\) подъемным краном поднимают на высоту \\(h = 3,0 \\text{ м}\\) с ускорением, модуль которого \\(a = 1,0 \\text{ м/с}^2\\). Работа крана, поднимающего груз, равна:",
+                image: null,
+                options: ["0,30 кДж", "1,0 кДж", "3,0 кДж", "3,3 кДж", "5,3 кДж"],
+                correct: 3,
+                solution: "Работа подъемного крана вычисляется как произведение силы натяжения троса на высоту подъема груза:<br>$$ A = F \\cdot h $$<br>Поскольку груз поднимают с ускорением, направленным вверх, по второму закону Ньютона \\(F - mg = ma\\). Из этого уравнения находим силу натяжения, с которой кран тянет груз вверх:<br>$$ F = m(g + a) = 100 \\cdot (10 + 1,0) = 1100 \\text{ Н} $$<br>Теперь подставим силу в формулу для нахождения совершенной работы:<br>$$ A = 1100 \\cdot 3,0 = 3300 \\text{ Дж} = 3,3 \\text{ кДж} $$"
+            },
+            {
+                text: "На рисунке 3 приведена зависимость проекции силы на ось \\(Ox\\) от времени для тела массой \\(m = 500 \\text{ г}\\). Если в начальный момент времени тело покоилось, то кинетическая энергия этого тела будет \\(W_{\\text{к}} = 81,0 \\text{ Дж}\\) в момент времени:",
+                image: svg5,
+                options: ["1,50 с", "1,70 с", "2,75 с", "3,00 с", "4,00 с"],
+                correct: 3,
+                solution: "Свяжем кинетическую энергию тела с его импульсом с помощью стандартной формулы \\(W_{\\text{к}} = \\frac{p^2}{2m}\\). Отсюда необходимый импульс тела, который нужно набрать, равен:<br>$$ p = \\sqrt{2m W_{\\text{к}}} = \\sqrt{2 \\cdot 0,5 \\cdot 81,0} = 9 \\text{ кг}\\cdot\\text{м/с} $$<br>Согласно теореме об изменении импульса, приобретенный импульс равен импульсу силы. Геометрически импульс силы представляет собой площадь под графиком зависимости силы от времени \\(F_x(t)\\). Нам нужно найти такой момент времени, при котором площадь фигуры под графиком станет равна 9.<br><br>Считаем площадь частями:<br>За первую секунду (от 0 до 1 с) график образует прямоугольник площадью \\(1 \\cdot 2 = 2\\).<br>За вторую секунду (от 1 до 2 с) график образует трапецию площадью \\(\\frac{2+4}{2} \\cdot 1 = 3\\).<br>Таким образом, к концу второй секунды суммарно накоплен импульс \\(2 + 3 = 5\\).<br><br>До требуемого импульса 9 нам не хватает еще 4. На участке времени после 2 секунд сила постоянна и равна 4 Н. Чтобы набрать дополнительную площадь 4 прямоугольником высотой 4, потребуется дополнительное время:<br>$$ \\Delta t = \\frac{4}{4} = 1 \\text{ с} $$<br>Общее время с начала движения составит \\(2 \\text{ с} + 1 \\text{ с} = 3,00 \\text{ с}\\)."
+            },
+            {
+                text: "К невесомой нерастяжимой нити подвешен груз массой \\(m = 30 \\text{ кг}\\). Если нить с грузом отклонить на угол \\(\\alpha = 90^\\circ\\) от вертикали и отпустить, то в момент прохождения грузом низшей точки траектории модуль силы натяжения \\(F\\) нити равен:",
+                image: null,
+                options: ["0,10 кН", "0,20 кН", "0,40 кН", "0,50 кН", "0,90 кН"],
+                correct: 4,
+                solution: "Груз отпустили из строго горизонтального положения, поэтому высота падения до нижней точки равна длине нити \\(L\\). По закону сохранения механической энергии, вся потенциальная энергия в верхней точке полностью перейдет в кинетическую в низшей точке траектории:<br>$$ mgL = \\frac{mv^2}{2} \\implies v^2 = 2gL $$<br>В низшей точке на груз действуют направленная вертикально вверх сила натяжения нити \\(F\\) и направленная вниз сила тяжести \\(mg\\). Так как груз движется по дуге окружности, у него присутствует центростремительное ускорение. Запишем второй закон Ньютона:<br>$$ F - mg = m \\frac{v^2}{L} $$<br>Подставим выражение для квадрата скорости в это уравнение:<br>$$ F - mg = m \\frac{2gL}{L} = 2mg $$<br>Таким образом, сила натяжения нити составит \\(F = mg + 2mg = 3mg\\). То есть при падении маятника с угла 90 градусов натяжение нити в нижней точке всегда в 3 раза больше силы тяжести.<br><br>Вычислим точное значение:<br>$$ F = 3 \\cdot 30 \\cdot 10 = 900 \\text{ Н} = 0,90 \\text{ кН} $$"
+            }
+        ];
+
+        const container = document.getElementById('tasks-container');
+
+        // Генерация карточек задач
+        tasks.forEach((task, index) => {
+            const taskNumber = index + 1;
+
+            const card = document.createElement('div');
+            card.className = 'task-card';
+
+            const header = document.createElement('div');
+            header.className = 'task-header';
+            header.textContent = `Задача № ${taskNumber}`;
+            card.appendChild(header);
+
+            const textContent = document.createElement('div');
+            textContent.className = 'task-text';
+            textContent.innerHTML = task.text;
+            card.appendChild(textContent);
+
+            if (task.image) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'image-container';
+                imgContainer.innerHTML = task.image;
+                card.appendChild(imgContainer);
+            }
+
+            const optionsGrid = document.createElement('div');
+            optionsGrid.className = 'options-grid';
+
+            let isAnswered = false;
+            let selectedBtn = null;
+            let buttonElements = [];
+
+            // Создаем кнопки с вариантами
+            task.options.forEach((optText, optIndex) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<b>${optIndex + 1})</b> ${optText}`;
+
+                btn.addEventListener('click', function() {
+                    if (isAnswered) return;
+                    buttonElements.forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedBtn = { button: this, index: optIndex };
+                });
+
+                buttonElements.push(btn);
+                optionsGrid.appendChild(btn);
+            });
+
+            card.appendChild(optionsGrid);
+
+            const actionsGroup = document.createElement('div');
+            actionsGroup.className = 'actions-group';
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'action-btn check-btn';
+            checkBtn.textContent = 'Проверить ответ';
+
+            const solutionToggleBtn = document.createElement('button');
+            solutionToggleBtn.className = 'action-btn solution-toggle-btn';
+            solutionToggleBtn.textContent = 'Показать решение';
+
+            const solutionBox = document.createElement('div');
+            solutionBox.className = 'solution-box';
+            solutionBox.innerHTML = `<h4>Разбор решения:</h4>${task.solution}`;
+
+            // Логика кнопки "Проверить"
+            checkBtn.addEventListener('click', () => {
+                if (isAnswered) return;
+
+                if (!selectedBtn) {
+                    alert('Пожалуйста, выберите вариант ответа перед проверкой.');
+                    return;
+                }
+
+                isAnswered = true;
+                checkBtn.style.display = 'none';
+
+                buttonElements.forEach(btn => btn.disabled = true);
+
+                if (selectedBtn.index === task.correct) {
+                    selectedBtn.button.classList.add('correct');
+                } else {
+                    selectedBtn.button.classList.add('wrong');
+                    buttonElements[task.correct].classList.add('correct');
+                }
+
+                solutionToggleBtn.style.display = 'block';
+            });
+
+            // Логика кнопки "Показать решение"
+            solutionToggleBtn.addEventListener('click', () => {
+                if (solutionBox.classList.contains('visible')) {
+                    solutionBox.classList.remove('visible');
+                    solutionToggleBtn.textContent = 'Показать решение';
+                } else {
+                    solutionBox.classList.add('visible');
+                    solutionToggleBtn.textContent = 'Скрыть решение';
+                }
+            });
+
+            actionsGroup.appendChild(checkBtn);
+            actionsGroup.appendChild(solutionToggleBtn);
+            card.appendChild(actionsGroup);
+            card.appendChild(solutionBox);
+            container.appendChild(card);
+        });
+
+        // Запуск MathJax для обработки всех сгенерированных формул
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err));
+        }
+    </script>
+</body>
+</html>
