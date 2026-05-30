@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МКТ и Термодинамика</title>
+    
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)']] },
+            chtml: { scale: 1.1 }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --correct-color: #10b981;
+            --wrong-color: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 500;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 20px; font-weight: 800; }
+
+        .nav-menu { text-align: center; margin-bottom: 30px; }
+        .nav-menu a {
+            text-decoration: none; padding: 10px 20px; border-radius: 8px;
+            font-weight: bold; margin: 0 5px; transition: 0.2s;
+            display: inline-block; margin-bottom: 10px;
+        }
+        .nav-menu a.active { background-color: var(--primary-color); color: white; }
+        .nav-menu a:not(.active) { background-color: #cbd5e1; color: var(--text-main); }
+        .nav-menu a:not(.active):hover { background-color: #94a3b8; }
+
+        .task-card {
+            background-color: var(--card-bg); border-radius: 12px; padding: 24px;
+            margin-bottom: 28px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0; overflow: hidden;
+        }
+
+        .task-header { font-weight: 700; font-size: 1.25rem; margin-bottom: 16px; color: var(--primary-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .task-text { margin-bottom: 20px; overflow-wrap: break-word; word-wrap: break-word; }
+
+        .image-container {
+            margin: 20px 0; text-align: center; background-color: #f1f5f9; border: 1px dashed #cbd5e1;
+            padding: 20px; border-radius: 8px; overflow-x: auto;
+        }
+
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 20px; }
+
+        .option-btn {
+            background-color: #f8fafc; border: 2px solid #cbd5e1; color: var(--text-main);
+            padding: 14px 16px; border-radius: 8px; font-size: 1.05rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s ease; text-align: center;
+        }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary-color); background-color: #eff6ff; }
+        .option-btn.selected { background-color: #dbeafe; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        .option-btn.correct, .text-input.correct { background-color: var(--correct-color) !important; color: white !important; border-color: var(--correct-color) !important; }
+        .option-btn.wrong, .text-input.wrong { background-color: var(--wrong-color) !important; color: white !important; border-color: var(--wrong-color) !important; }
+
+        .text-input { width: 100%; max-width: 300px; padding: 14px 16px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .text-input:focus { border-color: var(--primary-color); }
+
+        .actions-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .action-btn { padding: 14px 24px; color: white; border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; transition: background-color 0.2s; font-weight: 700; flex: 1; min-width: 180px; }
+        .check-btn { background-color: var(--primary-color); }
+        .check-btn:hover { background-color: var(--primary-hover); }
+        .check-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .solution-toggle-btn { background-color: #f59e0b; display: none; }
+        .solution-toggle-btn:hover { background-color: #d97706; }
+
+        .solution-box {
+            display: none; margin-top: 24px; background-color: #f0fdf4; border: 2px solid #bbf7d0;
+            padding: 24px; border-radius: 8px; color: #166534; overflow-x: auto; overflow-wrap: break-word; word-wrap: break-word;
+        }
+        .solution-box.visible { display: block; animation: fadeIn 0.4s ease-out; }
+        .solution-box h4 { margin-top: 0; color: #15803d; margin-bottom: 16px; font-size: 1.15rem; font-weight: 800; }
+        .svg-solution { display: block; margin: 20px auto; background: white; padding: 10px; border-radius: 8px; border: 1px solid #bbf7d0; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) {
+            body { padding: 12px; font-size: 1rem; }
+            .task-card { padding: 18px; }
+            .options-grid { grid-template-columns: 1fr; }
+            .actions-group { flex-direction: column; }
+            .action-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Тренажёр по физике</h1>
+        
+        <div class="nav-menu">
+            <a href="index.html">Механика</a>
+            <a href="mkt.html" class="active">МКТ и Термодинамика</a>
+        </div>
+
+        <div id="tasks-container"></div>
+    </div>
+
+    <script>
+        const svgTask1 = `
+        <svg viewBox="0 0 800 500" width="100%" style="max-width:800px; background-color: transparent;">
+            <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <g transform="translate(300, 10)">
+                <line x1="40" y1="180" x2="240" y2="180" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+                <line x1="40" y1="180" x2="40" y2="20" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+                <text x="20" y="30" font-family="serif" font-style="italic" font-size="20">p</text>
+                <text x="230" y="210" font-family="serif" font-style="italic" font-size="20">V</text>
+                <text x="25" y="200" font-size="16">0</text>
+                <path d="M 70 50 Q 90 140 150 140" fill="none" stroke="#0f172a" stroke-width="3"/>
+                <polygon points="150,140 140,133 143,140 140,147" fill="#0f172a"/> 
+                <line x1="150" y1="140" x2="150" y2="50" stroke="#0f172a" stroke-width="3" marker-end="url(#arr)"/>
+                <line x1="150" y1="50" x2="210" y2="50" stroke="#0f172a" stroke-width="3" marker-end="url(#arr)"/>
+            </g>
+            <g transform="translate(10, 260)">
+                <text x="0" y="20" font-size="18" font-weight="bold">1)</text>
+                <line x1="40" y1="150" x2="150" y2="150" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/><line x1="40" y1="150" x2="40" y2="30" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+                <text x="20" y="40" font-family="serif" font-style="italic" font-size="18">V</text><text x="140" y="180" font-family="serif" font-style="italic" font-size="18">T</text><text x="25" y="170" font-size="16">0</text>
+                <line x1="60" y1="60" x2="60" y2="120" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="60" y1="120" x2="110" y2="120" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="110" y1="120" x2="140" y2="90" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/>
+                <text x="45" y="65" font-size="16">1</text> <text x="45" y="135" font-size="16">2</text> <text x="110" y="140" font-size="16">3</text>
+            </g>
+            <g transform="translate(170, 260)">
+                <text x="0" y="20" font-size="18" font-weight="bold">2)</text>
+                <line x1="40" y1="150" x2="150" y2="150" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/><line x1="40" y1="150" x2="40" y2="30" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+                <text x="20" y="40" font-family="serif" font-style="italic" font-size="18">V</text><text x="140" y="180" font-family="serif" font-style="italic" font-size="18">T</text>
+                <line x1="50" y1="140" x2="90" y2="80" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="90" y1="80" x2="140" y2="80" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="140" y1="80" x2="140" y2="40" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/>
+                <text x="60" y="130" font-size="16">1</text> <text x="80" y="70" font-size="16">2</text> <text x="145" y="95" font-size="16">3</text>
+            </g>
+            <g transform="translate(330, 260)">
+                <text x="0" y="20" font-size="18" font-weight="bold">3)</text>
+                <line x1="40" y1="150" x2="150" y2="150" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/><line x1="40" y1="150" x2="40" y2="30" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+                <text x="20" y="40" font-family="serif" font-style="italic" font-size="18">V</text><text x="140" y="180" font-family="serif" font-style="italic" font-size="18">T</text>
+                <line x1="40" y1="150" x2="140" y2="50" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="4,4"/>
+                <line x1="60" y1="130" x2="60" y2="80" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="60" y1="80" x2="110" y2="80" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="110" y1="80" x2="140" y2="50" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/>
+                <text x="45" y="135" font-size="16">1</text> <text x="45" y="75" font-size="16">2</text> <text x="110" y="95" font-size="16">3</text>
+            </g>
+            <g transform="translate(490, 260)">
+                <text x="0" y="20" font-size="18" font-weight="bold">4)</text>
+                <line x1="40" y1="150" x2="150" y2="150" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/><line x1="40" y1="150" x2="40" y2="30" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+                <text x="20" y="40" font-family="serif" font-style="italic" font-size="18">V</text><text x="140" y="180" font-family="serif" font-style="italic" font-size="18">T</text>
+                <line x1="60" y1="130" x2="60" y2="80" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="60" y1="80" x2="110" y2="80" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="110" y1="80" x2="140" y2="50" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/>
+                <text x="45" y="135" font-size="16">1</text> <text x="45" y="75" font-size="16">2</text> <text x="110" y="95" font-size="16">3</text>
+            </g>
+            <g transform="translate(650, 260)">
+                <text x="0" y="20" font-size="18" font-weight="bold">5)</text>
+                <line x1="40" y1="150" x2="150" y2="150" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/><line x1="40" y1="150" x2="40" y2="30" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+                <text x="20" y="40" font-family="serif" font-style="italic" font-size="18">V</text><text x="140" y="180" font-family="serif" font-style="italic" font-size="18">T</text>
+                <line x1="120" y1="130" x2="120" y2="80" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="120" y1="80" x2="70" y2="80" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/><line x1="70" y1="80" x2="100" y2="40" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/>
+                <text x="130" y="135" font-size="16">1</text> <text x="130" y="75" font-size="16">2</text> <text x="50" y="85" font-size="16">3</text>
+            </g>
+            <text x="380" y="480" font-family="sans-serif" font-size="18" font-style="italic">Рис. 1</text>
+        </svg>`;
+
+        const svgTask2 = `
+        <svg viewBox="0 0 350 220" width="100%" height="220" style="max-width:350px;">
+            <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <text x="20" y="20" font-family="serif" font-style="italic" font-size="18">p<tspan font-family="sans-serif" font-style="normal">, МПа</tspan></text>
+            <text x="300" y="200" font-family="serif" font-style="italic" font-size="18">V<tspan font-family="sans-serif" font-style="normal">, м³</tspan></text>
+            <line x1="60" y1="170" x2="60" y2="30" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="60" y1="170" x2="310" y2="170" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <text x="40" y="185" font-size="16">0</text><text x="15" y="135" font-size="16">0,20</text> <text x="15" y="55" font-size="16">0,60</text>
+            <text x="120" y="195" font-size="16">0,30</text> <text x="200" y="195" font-size="16">0,60</text>
+            <line x1="60" y1="130" x2="130" y2="130" stroke="#0f172a" stroke-dasharray="5" stroke-width="1.5"/>
+            <line x1="60" y1="50" x2="210" y2="50" stroke="#0f172a" stroke-dasharray="5" stroke-width="1.5"/>
+            <line x1="130" y1="170" x2="130" y2="130" stroke="#0f172a" stroke-dasharray="5" stroke-width="1.5"/>
+            <line x1="210" y1="170" x2="210" y2="50" stroke="#0f172a" stroke-dasharray="5" stroke-width="1.5"/>
+            <line x1="130" y1="130" x2="210" y2="50" stroke="#0f172a" stroke-width="3" marker-end="url(#arr)"/>
+            <text x="110" y="150" font-size="18" font-weight="bold">1</text> <text x="220" y="45" font-size="18" font-weight="bold">2</text>
+        </svg>`;
+
+        // ИСПРАВЛЕННЫЙ ГРАФИК К ЗАДАЧЕ 4
+        const svgTask4 = `
+        <svg viewBox="0 0 400 240" width="100%" height="240" style="max-width:400px;">
+            <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <text x="10" y="20" font-family="serif" font-style="italic" font-size="16">T<tspan font-family="sans-serif" font-style="normal">, K</tspan></text>
+            <text x="350" y="220" font-family="serif" font-style="italic" font-size="16">Q<tspan font-family="sans-serif" font-style="normal">, кДж</tspan></text>
+            
+            <line x1="60" y1="200" x2="60" y2="30" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="60" y1="200" x2="350" y2="200" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arr)"/>
+            
+            <text x="25" y="205" font-size="14">300</text> 
+            <text x="25" y="170" font-size="14">320</text> 
+            <text x="25" y="135" font-size="14">340</text> 
+            <text x="25" y="100" font-size="14">360</text> 
+            <text x="25" y="65" font-size="14">380</text>
+            
+            <text x="55" y="220" font-size="14">0</text> 
+            <text x="100" y="220" font-size="14">20</text> 
+            <text x="150" y="220" font-size="14">40</text> 
+            <text x="200" y="220" font-size="14">60</text> 
+            <text x="250" y="220" font-size="14">80</text> 
+            <text x="300" y="220" font-size="14">100</text>
+            
+            <path d="M 60 165 h 250 M 60 130 h 250 M 60 95 h 250 M 60 60 h 250" stroke="#cbd5e1" stroke-dasharray="4"/>
+            <path d="M 110 200 v -140 M 160 200 v -140 M 210 200 v -140 M 260 200 v -140 M 310 200 v -140" stroke="#cbd5e1" stroke-dasharray="4"/>
+            
+            <!-- Прямая 1: начинается с T=300 (y=200), заканчивается на Q=100 (x=310), T=340 (y=130) -->
+            <line x1="60" y1="200" x2="310" y2="130" stroke="#0f172a" stroke-width="2.5"/> <text x="315" y="130" font-weight="bold" font-size="16">1</text>
+            <!-- Прямая 2: начинается с T=300 (y=200), заканчивается на Q=80 (x=260), T=380 (y=60) -->
+            <line x1="60" y1="200" x2="260" y2="60" stroke="#0f172a" stroke-width="2.5"/> <text x="265" y="55" font-weight="bold" font-size="16">2</text>
+            <!-- Прямая 3: начинается с T=320 (y=165), заканчивается на Q=60 (x=210), T=380 (y=60) -->
+            <line x1="60" y1="165" x2="210" y2="60" stroke="#0f172a" stroke-width="2.5"/> <text x="195" y="50" font-weight="bold" font-size="16">3</text>
+        </svg>`;
+
+        const svgTask5 = `
+        <svg viewBox="0 0 350 240" width="100%" height="240" style="max-width:350px;">
+            <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <text x="20" y="20" font-family="serif" font-style="italic" font-size="18">p</text>
+            <text x="310" y="200" font-family="serif" font-style="italic" font-size="18">V</text>
+            <line x1="50" y1="180" x2="50" y2="30" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="50" y1="180" x2="310" y2="180" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <text x="35" y="195" font-size="16">0</text>
+            <text x="20" y="130" font-size="16" font-family="serif" font-style="italic">p<tspan baseline-shift="sub" font-size="0.7em">0</tspan></text> 
+            <text x="10" y="60" font-size="16" font-family="serif" font-style="italic">4p<tspan baseline-shift="sub" font-size="0.7em">0</tspan></text>
+            <text x="110" y="205" font-size="16" font-family="serif" font-style="italic">V<tspan baseline-shift="sub" font-size="0.7em">0</tspan></text> 
+            <text x="210" y="205" font-size="16" font-family="serif" font-style="italic">2V<tspan baseline-shift="sub" font-size="0.7em">0</tspan></text>
+            <line x1="50" y1="125" x2="120" y2="125" stroke="#0f172a" stroke-dasharray="5" stroke-width="1.5"/>
+            <line x1="50" y1="55" x2="220" y2="55" stroke="#0f172a" stroke-dasharray="5" stroke-width="1.5"/>
+            <line x1="120" y1="180" x2="120" y2="125" stroke="#0f172a" stroke-dasharray="5" stroke-width="1.5"/>
+            <line x1="220" y1="180" x2="220" y2="55" stroke="#0f172a" stroke-dasharray="5" stroke-width="1.5"/>
+            <line x1="120" y1="125" x2="120" y2="60" stroke="#0f172a" stroke-width="3" marker-end="url(#arr)"/> <line x1="120" y1="60" x2="120" y2="55" stroke="#0f172a" stroke-width="3"/>
+            <line x1="120" y1="55" x2="210" y2="55" stroke="#0f172a" stroke-width="3" marker-end="url(#arr)"/> <line x1="210" y1="55" x2="220" y2="55" stroke="#0f172a" stroke-width="3"/>
+            <line x1="220" y1="55" x2="130" y2="118" stroke="#0f172a" stroke-width="3" marker-end="url(#arr)"/> <line x1="130" y1="118" x2="120" y2="125" stroke="#0f172a" stroke-width="3"/>
+            <text x="95" y="135" font-size="18" font-weight="bold">1</text> <text x="95" y="50" font-size="18" font-weight="bold">2</text> <text x="230" y="50" font-size="18" font-weight="bold">3</text>
+        </svg>`;
+
+        const solSvgTask11 = `<svg class="svg-solution" viewBox="0 0 200 120" width="100%" height="120">
+            <defs><marker id="arrS2" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M 0 0 L 5 2.5 L 0 5 z" fill="#15803d"/></marker></defs>
+            <line x1="20" y1="100" x2="180" y2="100" stroke="#15803d" stroke-width="1.5"/>
+            <rect x="70" y="70" width="40" height="30" fill="#bbf7d0" stroke="#15803d" stroke-width="1.5"/>
+            <circle cx="90" cy="85" r="2" fill="#15803d"/>
+            <line x1="90" y1="85" x2="90" y2="120" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrS2)"/> <text x="95" y="115" fill="#15803d" font-size="12">mg</text>
+            <line x1="90" y1="70" x2="90" y2="30" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrS2)"/> <text x="95" y="40" fill="#15803d" font-size="12">N</text>
+            <line x1="90" y1="85" x2="150" y2="50" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrS2)"/> <text x="145" y="45" fill="#15803d" font-size="12">F</text>
+            <line x1="70" y1="85" x2="30" y2="85" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrS2)"/> <text x="35" y="75" fill="#15803d" font-size="12">F<tspan baseline-shift="sub" font-size="0.7em">тр</tspan></text>
+            <path d="M 120 85 A 30 30 0 0 0 115 70" fill="none" stroke="#15803d"/><text x="125" y="80" fill="#15803d" font-size="12">30°</text>
+            <line x1="90" y1="85" x2="130" y2="85" stroke="#15803d" stroke-dasharray="3 3"/> 
+        </svg>`;
+
+        const tasks = [
+            {
+                text: "Над данной массой идеального газа проведен процесс, показанный на рисунке 1. Какой из нижеприведенных графиков (1—5) соответствует этому процессу в координатах \\(V; T\\)?",
+                image: svgTask1,
+                options: ["1", "2", "3", "4", "5"],
+                correct: 2,
+                solution: "Рассмотрим процессы на главном графике в координатах \\(p, V\\):<br>1. Изотермическое расширение (кривая идет вниз-вправо): давление падает, объем растет, температура постоянна. На графике \\(V, T\\) это вертикальная линия, направленная <b>вверх</b> (так как объем \\(V\\) растет, а \\(T\\) не меняется).<br>2. Изохорное нагревание (вертикальная линия вверх): объем постоянен, давление растет, следовательно, температура растет. На графике \\(V, T\\) это горизонтальная линия, направленная <b>вправо</b>.<br>3. Изобарное расширение (горизонтальная линия вправо): давление постоянно, объем растет. По закону Гей-Люссака объем прямо пропорционален температуре (\\(V \\sim T\\)). На графике \\(V, T\\) это прямая линия, выходящая из начала координат и идущая диагонально <b>вверх-вправо</b>.<br><br>Этой последовательности (вверх, вправо, по диагонали от нуля) идеально соответствует график под номером <b>3</b>. Обратите внимание на пунктирную линию из начала координат — она подчеркивает, что последний процесс является изобарой."
+            },
+            {
+                text: "С одноатомным идеальным газом происходит процесс 1–2, график которого в координатах \\((p; V)\\) представлен на рисунке 2. Количество теплоты, сообщенное при этом газу, равно:",
+                image: svgTask2,
+                options: ["0,12 МДж", "0,24 МДж", "0,30 МДж", "0,57 МДж", "0,72 МДж"],
+                correct: 3,
+                solution: "Согласно первому закону термодинамики, сообщенное газу количество теплоты равно сумме изменения его внутренней энергии и совершенной им работы: \\(Q = \\Delta U + A\\).<br><br>1. Изменение внутренней энергии одноатомного идеального газа:<br>$$ \\Delta U = \\frac{3}{2}(p_2 V_2 - p_1 V_1) $$<br>Подставим значения с графика (не забывая перевести МПа в Па):<br>$$ \\Delta U = 1,5 \\cdot (6\\cdot 10^5 \\cdot 0,60 - 2\\cdot 10^5 \\cdot 0,30) = 1,5 \\cdot (3,6 - 0,6) \\cdot 10^5 = 4,5 \\cdot 10^5 \\text{ Дж} = 0,45 \\text{ МДж} $$<br>2. Работа газа численно равна площади под графиком (трапеции):<br>$$ A = \\frac{p_1 + p_2}{2} (V_2 - V_1) = \\frac{2\\cdot 10^5 + 6\\cdot 10^5}{2} (0,60 - 0,30) $$<br>$$ A = 4\\cdot 10^5 \\cdot 0,30 = 1,2 \\cdot 10^5 \\text{ Дж} = 0,12 \\text{ МДж} $$<br>3. Общее количество теплоты:<br>$$ Q = 0,45 \\text{ МДж} + 0,12 \\text{ МДж} = 0,57 \\text{ МДж} $$"
+            },
+            {
+                text: "Температура идеального газа в количестве \\(\\nu = 1 \\text{ моль}\\) изменяется по закону \\(T = \\alpha V^2\\), где \\(T\\) — абсолютная температура, \\(V\\) — объем. Работа этого газа при его расширении от \\(V_1 = 2,00 \\text{ м}^3\\) до \\(V_2 = 4,00 \\text{ м}^3\\), если \\(\\alpha = 10,0 \\text{ К/м}^6\\), равна:",
+                image: null,
+                options: ["499 Дж", "600 Дж", "997 Дж", "1,20 кДж", "2,40 кДж"],
+                correct: 0,
+                solution: "Запишем уравнение Менделеева-Клапейрона: \\(pV = \\nu RT\\).<br>Подставим заданную зависимость \\(T = \\alpha V^2\\):<br>$$ pV = \\nu R \\alpha V^2 \\implies p = \\nu R \\alpha V $$<br>Мы видим, что давление газа прямо пропорционально объему (\\(p \\sim V\\)). Это означает, что график процесса в координатах \\((p, V)\\) представляет собой прямую линию, выходящую из начала координат.<br><br>Работа газа численно равна площади под графиком (площадь прямоугольной трапеции):<br>$$ A = \\frac{p_1 + p_2}{2}(V_2 - V_1) $$<br>Так как \\(p = \\nu R \\alpha V\\), формулу для площади трапеции можно упростить до разности квадратов:<br>$$ A = \\frac{1}{2} \\nu R \\alpha (V_2^2 - V_1^2) $$<br>Подставляем числа (универсальная газовая постоянная \\(R = 8,31 \\text{ Дж/(моль}\\cdot\\text{К)}\\)):<br>$$ A = 0,5 \\cdot 1 \\cdot 8,31 \\cdot 10,0 \\cdot (4,00^2 - 2,00^2) = 41,55 \\cdot (16 - 4) = 41,55 \\cdot 12 = 498,6 \\text{ Дж} $$<br>С учетом округления получаем <b>499 Дж</b>."
+            },
+            {
+                text: "Из изображенной на графике зависимости температуры тела от количества подведенной теплоты для трех тел одинаковой массы (рис. 1) следует, что удельные теплоемкости этих тел связаны соотношением:",
+                image: svgTask4,
+                options: ["\\(c_1 > c_2 > c_3\\)", "\\(c_1 > c_2 = c_3\\)", "\\(c_1 < c_2 < c_3\\)", "\\(c_1 < c_2 = c_3\\)", "\\(c_1 = c_2 = c_3\\)"],
+                correct: 1, // ИСПРАВЛЕННЫЙ ВАРИАНТ (Индекс 1 = Вариант 2)
+                solution: "Формула нагревания тела: \\(Q = cm\\Delta T\\).<br>Выразим изменение температуры: \\(\\Delta T = \\frac{Q}{cm}\\).<br>Уравнение прямой на графике \\(T(Q)\\) имеет вид: \\(T = T_0 + \\frac{1}{cm} Q\\), где \\(T_0\\) — начальная температура.<br><br>Угол наклона прямой (её крутизна) определяется коэффициентом \\(\\frac{1}{cm}\\). Поскольку массы всех трех тел одинаковы, то чем круче график, тем <b>меньше</b> удельная теплоемкость \\(c\\).<br><br>Рассмотрим графики внимательно:<br>1. Прямые <b>2</b> и <b>3</b> параллельны друг другу (их наклон одинаков: обе прямые проходят ровно по диагонали клеточек). Из этого следует, что удельные теплоёмкости этих тел равны: \\(c_2 = c_3\\).<br>2. Прямая <b>1</b> имеет наименьший наклон (она самая пологая). Значит, знаменатель в коэффициенте наклона наибольший, следовательно, удельная теплоемкость первого тела самая большая: \\(c_1 > c_2\\).<br><br>Объединяем результаты и получаем правильное соотношение: <b>\\(c_1 > c_2 = c_3\\)</b>."
+            },
+            {
+                text: "На \\(p–V\\) диаграмме изображен цикл, проведенный с одноатомным идеальным газом (рис. 13). КПД \\(\\eta\\) этого цикла равен ... %.",
+                image: svgTask5,
+                correct: ["10.3", "10,3", "10"],
+                solution: "КПД теплового двигателя равен отношению полезной работы за цикл ко всему количеству теплоты, <b>полученному</b> газом от нагревателя: \\(\\eta = \\frac{A}{Q_{\\text{полученное}}}\\).<br><br>1. Полезная работа \\(A\\) численно равна площади цикла (прямоугольного треугольника):<br>$$ A = \\frac{1}{2}(4p_0 - p_0)(2V_0 - V_0) = \\frac{1}{2} \\cdot 3p_0 \\cdot V_0 = 1,5 p_0 V_0 $$<br>2. Газ получает теплоту на участках, где растет температура (1-2 и 2-3):<br>– <b>Процесс 1-2</b> (изохорное нагревание): работа равна нулю. \\(Q_{12} = \\Delta U = \\frac{3}{2} V_0 (4p_0 - p_0) = 4,5 p_0 V_0\\).<br>– <b>Процесс 2-3</b> (изобарное расширение): \\(Q_{23} = \\Delta U + A_{23} = \\frac{3}{2} \\cdot 4p_0 (2V_0 - V_0) + 4p_0(2V_0 - V_0) = 6 p_0 V_0 + 4 p_0 V_0 = 10 p_0 V_0\\).<br>Всего получено тепла: \\(Q_{\\text{пол}} = Q_{12} + Q_{23} = 14,5 p_0 V_0\\).<br><br>3. Рассчитаем КПД:<br>$$ \\eta = \\frac{1,5 p_0 V_0}{14,5 p_0 V_0} = \\frac{1,5}{14,5} = \\frac{3}{29} \\approx 0,1034 $$<br>В процентах это составляет примерно <b>10,3 %</b>."
+            },
+            {
+                text: "Изменение внутренней энергии газа, если ему передано количество теплоты \\(Q = 200 \\text{ Дж}\\) и внешние силы совершили над ним работу \\(A = 600 \\text{ Дж}\\), составляет:",
+                image: null,
+                options: ["0 Дж", "200 Дж", "400 Дж", "600 Дж", "800 Дж"],
+                correct: 4,
+                solution: "Согласно первому закону термодинамики, количество теплоты, переданное системе, идет на изменение ее внутренней энергии и совершение системой работы <b>над внешними телами</b>: \\(Q = \\Delta U + A_{\\text{газа}}\\).<br><br>Важно помнить, что работа внешних сил берется с обратным знаком по отношению к работе самого газа: \\(A_{\\text{внеш}} = - A_{\\text{газа}}\\).<br>Перепишем закон:<br>$$ \\Delta U = Q - A_{\\text{газа}} = Q + A_{\\text{внеш}} $$<br>Подставим числовые значения:<br>$$ \\Delta U = 200 \\text{ Дж} + 600 \\text{ Дж} = 800 \\text{ Дж} $$"
+            },
+            {
+                text: "Водород при давлении \\(p_1\\) нагревают от температуры \\(T_1 = 200 \\text{ К}\\) до температуры \\(T_2 = 10\\,000 \\text{ К}\\). При этом его молекулы практически полностью распадаются на атомы. Если объем и масса водорода остались неизменными, то давление водорода равно:",
+                image: null,
+                options: ["\\(50,0p_1\\)", "\\(75,0p_1\\)", "\\(100p_1\\)", "\\(200p_1\\)", "\\(800p_1\\)"],
+                correct: 2,
+                solution: "Запишем уравнение состояния идеального газа для начального и конечного состояний:<br>$$ p_1 V = \\nu_1 R T_1 $$<br>Молекула водорода (\\(H_2\\)) состоит из двух атомов. Когда при нагревании происходит полный распад (диссоциация) молекул на атомы, из каждой молекулы получается два отдельных атома. Это означает, что количество частиц (а следовательно, и количество вещества \\(\\nu\\)) увеличивается ровно в 2 раза: \\(\\nu_2 = 2\\nu_1\\).<br><br>Запишем уравнение для второго состояния (объем \\(V\\) по условию неизменен):<br>$$ p_2 V = (2\\nu_1) R T_2 $$<br>Разделим второе уравнение на первое:<br>$$ \\frac{p_2}{p_1} = \\frac{2 T_2}{T_1} = \\frac{2 \\cdot 10\\,000}{200} = \\frac{20\\,000}{200} = 100 $$<br>Отсюда \\(p_2 = 100p_1\\)."
+            },
+            {
+                text: "В сосуд, содержащий воду массой \\(m_1 = 10 \\text{ кг}\\) при температуре \\(t_1 = 12 \\text{ }^\\circ\\text{C}\\), поместили кусок льда, охлажденный до температуры \\(t_2 = -20 \\text{ }^\\circ\\text{C}\\), после чего температура в сосуде оказалась \\(t = 8,0 \\text{ }^\\circ\\text{C}\\). Масса куска льда, помещенного в сосуд, равна:<br><span style='font-size:0.9em; color:var(--text-muted);'>Уд. теплоемкость воды \\(c_в = 4200\\), льда \\(c_л = 2100\\), уд. теплота плавления льда \\(\\lambda = 3,3\\cdot 10^5\\).</span>",
+                image: null,
+                options: ["41 г", "0,11 кг", "0,24 кг", "0,41 кг", "1,1 кг"],
+                correct: 3,
+                solution: "Составим уравнение теплового баланса. Вода отдает тепло, а лед его получает.<br><br>1. Количество теплоты, отданное водой при остывании от 12 °C до 8 °C:<br>$$ Q_{\\text{отд}} = c_в m_1 (t_1 - t) = 4200 \\cdot 10 \\cdot (12 - 8) = 168\\,000 \\text{ Дж} $$<br>2. Лед проходит три стадии: нагревание до 0 °C, плавление, нагревание образовавшейся воды от 0 °C до 8 °C. Выразим полученное им тепло через искомую массу \\(m_x\\):<br>$$ Q_{\\text{пол}} = c_л m_x (0 - t_2) + \\lambda m_x + c_в m_x (t - 0) $$<br>$$ Q_{\\text{пол}} = m_x \\cdot (2100 \\cdot 20 + 330\\,000 + 4200 \\cdot 8) = m_x \\cdot (42\\,000 + 330\\,000 + 33\\,600) = m_x \\cdot 405\\,600 \\text{ Дж} $$<br>3. Приравниваем отданное и полученное тепло:<br>$$ 405\\,600 \\cdot m_x = 168\\,000 \\implies m_x = \\frac{168\\,000}{405\\,600} \\approx 0,414 \\text{ кг} $$"
+            },
+            {
+                text: "Кастрюле с водой сообщили количество теплоты \\(Q = 2,0 \\cdot 10^6 \\text{ Дж}\\). Начальная температура воды \\(t = 20 \\text{ }^\\circ\\text{C}\\). Часть воды выкипела. Масса кастрюли \\(m_1 = 1,2 \\text{ кг}\\), её удельная теплоемкость \\(c_1 = 920 \\text{ Дж/(кг}\\cdot\\text{К)}\\). Масса воды \\(m_2 = 4,8 \\text{ кг}\\). Теплообменом с окружающей средой пренебречь. Доля выкипевшей воды составляет:<br><span style='font-size:0.9em; color:var(--text-muted);'>Уд. теплоемкость воды 4200 Дж/(кг·К), уд. теплота парообразования 2,3·10⁶ Дж/кг.</span>",
+                image: null,
+                options: ["2,7 %", "5,4 %", "11 %", "36 %", "48 %"],
+                correct: 0,
+                solution: "Общее количество теплоты пошло на нагревание кастрюли с водой до температуры кипения (100 °C) и на испарение части воды.<br><br>1. Найдем теплоту, затраченную на нагревание от 20 °C до 100 °C (\\(\\Delta t = 80\\)):<br>$$ Q_{\\text{нагр}} = c_1 m_1 \\Delta t + c_в m_2 \\Delta t = (920 \\cdot 1,2 + 4200 \\cdot 4,8) \\cdot 80 $$<br>$$ Q_{\\text{нагр}} = (1104 + 20160) \\cdot 80 = 21\\,264 \\cdot 80 = 1\\,701\\,120 \\text{ Дж} $$<br>2. Оставшаяся теплота пошла на парообразование массы \\(m_x\\):<br>$$ Q_{\\text{пар}} = Q - Q_{\\text{нагр}} = 2\\,000\\,000 - 1\\,701\\,120 = 298\\,880 \\text{ Дж} $$<br>3. Масса выкипевшей воды (\\(L = 2,3 \\cdot 10^6 \\text{ Дж/кг}\\)):<br>$$ m_x = \\frac{Q_{\\text{пар}}}{L} = \\frac{298\\,880}{2\\,300\\,000} \\approx 0,13 \\text{ кг} $$<br>4. Доля выкипевшей воды от изначальной массы \\(m_2\\):<br>$$ \\frac{m_x}{m_2} \\cdot 100\\% = \\frac{0,13}{4,8} \\cdot 100\\% \\approx 2,7\\% $$"
+            },
+            {
+                text: "В герметически закрытом сосуде находится воздух при температуре \\(t_1 = 25 \\text{ }^\\circ\\text{C}\\) (плотность насыщ. пара \\(p_{н1} = 3167 \\text{ Па}\\)) и относительной влажности \\(\\varphi_1 = 60\\%\\). Если температура понизилась до \\(t_2 = 20 \\text{ }^\\circ\\text{C}\\) (\\(p_{н2} = 2338 \\text{ Па}\\)), то в нем установится относительная влажность воздуха \\(\\varphi_2\\), равная:",
+                image: null,
+                options: ["76 %", "80 %", "81 %", "89 %", "90 %"],
+                correct: 1,
+                solution: "1. Найдем начальное парциальное давление водяного пара в сосуде:<br>$$ p_1 = \\varphi_1 p_{н1} = 0,60 \\cdot 3167 = 1900,2 \\text{ Па} $$<br>2. Сосуд герметично закрыт, значит объем и количество молекул пара остаются неизменными (изохорный процесс для пара, если не началась конденсация). Переведем температуры в Кельвины: \\(T_1 = 298 \\text{ К}\\), \\(T_2 = 293 \\text{ К}\\). По закону Шарля найдем новое парциальное давление пара:<br>$$ p_2 = p_1 \\frac{T_2}{T_1} = 1900,2 \\cdot \\frac{293}{298} \\approx 1868,3 \\text{ Па} $$<br>3. Рассчитаем новую относительную влажность:<br>$$ \\varphi_2 = \\frac{p_2}{p_{н2}} \\cdot 100\\% = \\frac{1868,3}{2338} \\cdot 100\\% \\approx 79,9\\% $$<br>С учетом округления получаем <b>80 %</b>."
+            },
+            {
+                text: "В комнате объемом \\(V = 80 \\text{ м}^3\\) при температуре \\(t = 22 \\text{ }^\\circ\\text{C}\\) относительная влажность воздуха \\(\\varphi_1 = 50\\%\\). Плотность насыщенного водяного пара \\(\\rho_н = 19,4 \\text{ г/м}^3\\). Если в комнате при той же температуре дополнительно испарить воду массой \\(\\Delta m = 0,388 \\text{ кг}\\), то относительная влажность воздуха \\(\\varphi_2\\) станет:",
+                image: null,
+                options: ["60 %", "72 %", "75 %", "80 %", "89 %"],
+                correct: 2,
+                solution: "Относительную влажность можно выражать через плотность пара: \\(\\varphi = \\frac{\\rho}{\\rho_н}\\).<br><br>1. Найдем начальную абсолютную плотность пара в комнате:<br>$$ \\rho_1 = \\varphi_1 \\rho_н = 0,50 \\cdot 19,4 = 9,7 \\text{ г/м}^3 $$<br>2. Найдем массу пара, которая изначально содержалась в комнате:<br>$$ m_1 = \\rho_1 V = 9,7 \\cdot 80 = 776 \\text{ г} = 0,776 \\text{ кг} $$<br>3. После испарения воды общая масса пара стала:<br>$$ m_2 = m_1 + \\Delta m = 0,776 + 0,388 = 1,164 \\text{ кг} = 1164 \\text{ г} $$<br>4. Новая абсолютная плотность пара в комнате:<br>$$ \\rho_2 = \\frac{m_2}{V} = \\frac{1164}{80} = 14,55 \\text{ г/м}^3 $$<br>5. Рассчитаем новую относительную влажность:<br>$$ \\varphi_2 = \\frac{\\rho_2}{\\rho_н} \\cdot 100\\% = \\frac{14,55}{19,4} \\cdot 100\\% = 75\\% $$"
+            }
+        ];
+
+        const container = document.getElementById('tasks-container');
+
+        tasks.forEach((task, index) => {
+            const taskNumber = index + 1;
+            const card = document.createElement('div');
+            card.className = 'task-card';
+
+            const header = document.createElement('div');
+            header.className = 'task-header';
+            header.textContent = `Задача № ${taskNumber}`;
+            card.appendChild(header);
+
+            const textContent = document.createElement('div');
+            textContent.className = 'task-text';
+            textContent.innerHTML = task.text;
+            card.appendChild(textContent);
+
+            if (task.image) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'image-container';
+                imgContainer.innerHTML = task.image;
+                card.appendChild(imgContainer);
+            }
+
+            const optionsGrid = document.createElement('div');
+            optionsGrid.className = 'options-grid';
+
+            let isAnswered = false;
+            let selectedBtn = null;
+            let buttonElements = [];
+            let inputElement = null;
+
+            if (task.options) {
+                task.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = `<b>${optIndex + 1})</b> ${optText}`;
+                    
+                    btn.addEventListener('click', function() {
+                        if (isAnswered) return;
+                        buttonElements.forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedBtn = { button: this, index: optIndex };
+                    });
+
+                    buttonElements.push(btn);
+                    optionsGrid.appendChild(btn);
+                });
+            } else {
+                inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.className = 'text-input';
+                inputElement.placeholder = 'Введите ваш ответ...';
+                optionsGrid.appendChild(inputElement);
+            }
+
+            card.appendChild(optionsGrid);
+
+            const actionsGroup = document.createElement('div');
+            actionsGroup.className = 'actions-group';
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'action-btn check-btn';
+            checkBtn.textContent = 'Проверить ответ';
+
+            const solutionToggleBtn = document.createElement('button');
+            solutionToggleBtn.className = 'action-btn solution-toggle-btn';
+            solutionToggleBtn.textContent = 'Показать решение';
+
+            const solutionBox = document.createElement('div');
+            solutionBox.className = 'solution-box';
+            solutionBox.innerHTML = `<h4>Разбор решения:</h4>${task.solution}`;
+
+            checkBtn.addEventListener('click', () => {
+                if (isAnswered) return;
+                
+                if (task.options) {
+                    if (!selectedBtn) { alert('Пожалуйста, выберите вариант ответа.'); return; }
+                    isAnswered = true;
+                    buttonElements.forEach(btn => btn.disabled = true);
+                    
+                    if (selectedBtn.index === task.correct) {
+                        selectedBtn.button.classList.add('correct');
+                    } else {
+                        selectedBtn.button.classList.add('wrong');
+                        buttonElements[task.correct].classList.add('correct');
+                    }
+                } else {
+                    let userVal = inputElement.value.trim().replace(',', '.');
+                    if (userVal === '') { alert('Пожалуйста, введите ответ в поле.'); return; }
+                    isAnswered = true;
+                    inputElement.disabled = true;
+
+                    if (task.correct.includes(userVal)) {
+                        inputElement.classList.add('correct');
+                    } else {
+                        inputElement.classList.add('wrong');
+                        let correctText = task.correct[0].replace('.', ',');
+                        solutionBox.innerHTML = `<h4>Разбор решения:</h4><p style="color:var(--wrong-color); font-weight:bold;">Правильный ответ: ${correctText}</p>${task.solution}`;
+                    }
+                }
+
+                checkBtn.style.display = 'none';
+                solutionToggleBtn.style.display = 'block';
+                
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([solutionBox]);
+                }
+            });
+
+            solutionToggleBtn.addEventListener('click', () => {
+                if (solutionBox.classList.contains('visible')) {
+                    solutionBox.classList.remove('visible');
+                    solutionToggleBtn.textContent = 'Показать решение';
+                } else {
+                    solutionBox.classList.add('visible');
+                    solutionToggleBtn.textContent = 'Скрыть решение';
+                }
+            });
+
+            actionsGroup.appendChild(checkBtn);
+            actionsGroup.appendChild(solutionToggleBtn);
+            card.appendChild(actionsGroup);
+            card.appendChild(solutionBox);
+            container.appendChild(card);
+        });
+
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err));
+        }
+    </script>
+</body>
+</html>
