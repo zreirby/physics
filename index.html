@@ -48,6 +48,15 @@
             margin-bottom: 30px;
             font-weight: 800;
         }
+        .nav-menu { text-align: center; margin-bottom: 30px; }
+        .nav-menu a {
+            text-decoration: none; padding: 10px 20px; border-radius: 8px;
+            font-weight: bold; margin: 0 5px; transition: 0.2s;
+            display: inline-block; margin-bottom: 10px;
+        }
+        .nav-menu a.active { background-color: var(--primary-color); color: white; }
+        .nav-menu a:not(.active) { background-color: #cbd5e1; color: var(--text-main); }
+        .nav-menu a:not(.active):hover { background-color: #94a3b8; }
 
         .task-card {
             background-color: var(--card-bg);
