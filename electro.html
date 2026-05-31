@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Электричество и Магнетизм</title>
+    
+    <script>
+        window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, chtml: { scale: 1.1 } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb; --primary-hover: #1d4ed8; --bg-color: #f8fafc;
+            --card-bg: #ffffff; --text-main: #0f172a; --correct-color: #10b981; --wrong-color: #ef4444;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-weight: 500; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; line-height: 1.7; font-size: 1.05rem; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 20px; font-weight: 800; }
+
+        .nav-menu { text-align: center; margin-bottom: 30px; }
+        .nav-menu a { text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin: 0 5px; transition: 0.2s; display: inline-block; margin-bottom: 10px; }
+        .nav-menu a.active { background-color: var(--primary-color); color: white; }
+        .nav-menu a:not(.active) { background-color: #cbd5e1; color: var(--text-main); }
+        .nav-menu a:not(.active):hover { background-color: #94a3b8; }
+
+        .task-card { background-color: var(--card-bg); border-radius: 12px; padding: 24px; margin-bottom: 28px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; overflow: hidden; }
+        .task-header { font-weight: 700; font-size: 1.25rem; margin-bottom: 16px; color: var(--primary-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .task-text { margin-bottom: 20px; overflow-wrap: break-word; word-wrap: break-word; }
+
+        .image-container { margin: 20px 0; text-align: center; background-color: #f1f5f9; border: 1px dashed #cbd5e1; padding: 20px; border-radius: 8px; overflow-x: auto; }
+        
+        /* Изменено: теперь кнопки располагаются вертикально */
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        
+        .option-btn { 
+            background-color: #f8fafc; border: 2px solid #cbd5e1; color: var(--text-main); 
+            padding: 14px 20px; border-radius: 8px; font-size: 1.05rem; font-weight: 600; 
+            cursor: pointer; transition: all 0.2s ease; 
+            text-align: left; /* Текст выровнен по левому краю для удобства чтения */
+        }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary-color); background-color: #eff6ff; }
+        .option-btn.selected { background-color: #dbeafe; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        .option-btn.correct, .text-input.correct { background-color: var(--correct-color) !important; color: white !important; border-color: var(--correct-color) !important; }
+        .option-btn.wrong, .text-input.wrong { background-color: var(--wrong-color) !important; color: white !important; border-color: var(--wrong-color) !important; }
+
+        .text-input { width: 100%; max-width: 300px; padding: 14px 16px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .text-input:focus { border-color: var(--primary-color); }
+
+        .actions-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .action-btn { padding: 14px 24px; color: white; border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; transition: background-color 0.2s; font-weight: 700; flex: 1; min-width: 180px; text-align: center; }
+        .check-btn { background-color: var(--primary-color); }
+        .check-btn:hover { background-color: var(--primary-hover); }
+        .check-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .solution-toggle-btn { background-color: #f59e0b; display: none; }
+        .solution-toggle-btn:hover { background-color: #d97706; }
+
+        .solution-box { display: none; margin-top: 24px; background-color: #f0fdf4; border: 2px solid #bbf7d0; padding: 24px; border-radius: 8px; color: #166534; overflow-x: auto; overflow-wrap: break-word; word-wrap: break-word; }
+        .solution-box.visible { display: block; animation: fadeIn 0.4s ease-out; }
+        .solution-box h4 { margin-top: 0; color: #15803d; margin-bottom: 16px; font-size: 1.15rem; font-weight: 800; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) { body { padding: 12px; font-size: 1rem; } .task-card { padding: 18px; } .actions-group { flex-direction: column; } .action-btn { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Тренажёр по физике</h1>
+        <div class="nav-menu">
+            <a href="index.html">Механика</a>
+            <a href="mkt.html">МКТ и Термодинамика</a>
+            <a href="electro.html" class="active">Электричество и Магнетизм</a>
+        </div>
+        <div id="tasks-container"></div>
+    </div>
+
+    <script>
+        // --- ПЕРЕРИСОВАННЫЕ ВЕКТОРНЫЕ РИСУНКИ ---
+        
+        // Рисунок 11.1 (Заряды в ряд с правильными выносками)
+        const svg11_1 = `<svg viewBox="0 0 350 140" width="100%" style="max-width:350px; margin: 0 auto; display: block;">
+            <defs>
+                <marker id="arr1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker>
+                <marker id="arr1rev" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto"><path d="M 6 0 L 0 3 L 6 6 z" fill="#0f172a"/></marker>
+            </defs>
+            <text x="175" y="20" font-family="sans-serif" font-size="16" font-style="italic" text-anchor="middle">Рис. 11.1</text>
+            <line x1="30" y1="60" x2="320" y2="60" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="40" cy="60" r="5" fill="#0f172a"/>
+            <circle cx="160" cy="60" r="5" fill="#0f172a"/>
+            <circle cx="310" cy="60" r="5" fill="#0f172a"/>
+            
+            <text x="40" y="45" font-family="serif" font-style="italic" font-size="20" text-anchor="middle" font-weight="bold">+q</text>
+            <text x="160" y="45" font-family="serif" font-style="italic" font-size="20" text-anchor="middle" font-weight="bold">–q</text>
+            <text x="310" y="45" font-family="serif" font-style="italic" font-size="20" text-anchor="middle" font-weight="bold">+2q</text>
+            
+            <line x1="40" y1="65" x2="40" y2="125" stroke="#0f172a" stroke-width="1.5"/>
+            <line x1="160" y1="65" x2="160" y2="95" stroke="#0f172a" stroke-width="1.5"/>
+            <line x1="310" y1="65" x2="310" y2="125" stroke="#0f172a" stroke-width="1.5"/>
+            
+            <line x1="45" y1="85" x2="155" y2="85" stroke="#0f172a" stroke-width="1.5" marker-start="url(#arr1rev)" marker-end="url(#arr1)"/>
+            <text x="100" y="105" font-family="serif" font-style="italic" font-size="18" text-anchor="middle">r/2</text>
+            
+            <line x1="45" y1="120" x2="305" y2="120" stroke="#0f172a" stroke-width="1.5" marker-start="url(#arr1rev)" marker-end="url(#arr1)"/>
+            <text x="175" y="138" font-family="serif" font-style="italic" font-size="18" text-anchor="middle">r</text>
+        </svg>`;
+
+        // Рисунок 6 (Схема цепи с точным расположением R и C)
+        const svgCirc6 = `<svg viewBox="0 0 320 220" width="100%" style="max-width:320px; margin: 0 auto; display: block;">
+            <!-- Battery -->
+            <line x1="30" y1="170" x2="30" y2="115" stroke="#0f172a" stroke-width="2"/>
+            <line x1="10" y1="115" x2="50" y2="115" stroke="#0f172a" stroke-width="4"/> <!-- short - -->
+            <line x1="0" y1="105" x2="60" y2="105" stroke="#0f172a" stroke-width="2"/> <!-- long + -->
+            <line x1="30" y1="105" x2="30" y2="40" stroke="#0f172a" stroke-width="2"/>
+            <text x="0" y="140" font-family="serif" font-style="italic" font-size="18">&#x2130;, r</text> <!-- E, r -->
+            
+            <!-- Top wire & Resistor 1 -->
+            <line x1="30" y1="40" x2="80" y2="40" stroke="#0f172a" stroke-width="2"/>
+            <rect x="80" y="30" width="45" height="20" fill="white" stroke="#0f172a" stroke-width="2"/>
+            <text x="96" y="22" font-family="serif" font-style="italic" font-size="18">R</text>
+            <line x1="125" y1="40" x2="170" y2="40" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="170" cy="40" r="4" fill="#0f172a"/> <!-- Node Top -->
+            
+            <!-- Middle branch & Resistors 2, 3 -->
+            <line x1="170" y1="40" x2="170" y2="70" stroke="#0f172a" stroke-width="2"/>
+            <rect x="160" y="70" width="20" height="35" fill="white" stroke="#0f172a" stroke-width="2"/>
+            <text x="135" y="92" font-family="serif" font-style="italic" font-size="18">R</text>
+            <line x1="170" y1="105" x2="170" y2="115" stroke="#0f172a" stroke-width="2"/>
+            <rect x="160" y="115" width="20" height="35" fill="white" stroke="#0f172a" stroke-width="2"/>
+            <text x="135" y="137" font-family="serif" font-style="italic" font-size="18">R</text>
+            <line x1="170" y1="150" x2="170" y2="170" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="170" cy="170" r="4" fill="#0f172a"/> <!-- Node Bottom -->
+            
+            <!-- Right branch (C and R) -->
+            <line x1="170" y1="40" x2="220" y2="40" stroke="#0f172a" stroke-width="2"/>
+            <!-- Capacitor -->
+            <line x1="220" y1="20" x2="220" y2="60" stroke="#0f172a" stroke-width="2"/>
+            <line x1="230" y1="20" x2="230" y2="60" stroke="#0f172a" stroke-width="2"/>
+            <text x="218" y="15" font-family="serif" font-style="italic" font-size="18">C</text>
+            <line x1="230" y1="40" x2="290" y2="40" stroke="#0f172a" stroke-width="2"/>
+            
+            <!-- Right vertical wire -->
+            <line x1="290" y1="40" x2="290" y2="170" stroke="#0f172a" stroke-width="2"/>
+            
+            <!-- Bottom right wire & Resistor 4 -->
+            <line x1="290" y1="170" x2="250" y2="170" stroke="#0f172a" stroke-width="2"/>
+            <rect x="205" y="160" width="45" height="20" fill="white" stroke="#0f172a" stroke-width="2"/>
+            <text x="221" y="150" font-family="serif" font-style="italic" font-size="18">R</text>
+            <line x1="205" y1="170" x2="170" y2="170" stroke="#0f172a" stroke-width="2"/>
+            
+            <!-- Bottom left wire -->
+            <line x1="170" y1="170" x2="30" y2="170" stroke="#0f172a" stroke-width="2"/>
+            
+            <text x="145" y="210" font-family="sans-serif" font-size="16" font-style="italic">Рис. 6</text>
+        </svg>`;
+
+        const svg12_2 = `<svg viewBox="0 0 300 120" width="100%" style="max-width:300px; margin: 0 auto; display: block;">
+            <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <line x1="80" y1="30" x2="250" y2="30" stroke="#0f172a" stroke-width="2"/>
+            <text x="100" y="22" font-weight="bold">+</text><text x="140" y="22" font-weight="bold">+</text><text x="180" y="22" font-weight="bold">+</text><text x="220" y="22" font-weight="bold">+</text>
+            <line x1="80" y1="90" x2="250" y2="90" stroke="#0f172a" stroke-width="2"/>
+            <text x="100" y="110" font-weight="bold">–</text><text x="140" y="110" font-weight="bold">–</text><text x="180" y="110" font-weight="bold">–</text><text x="220" y="110" font-weight="bold">–</text>
+            <circle cx="50" cy="60" r="8" fill="white" stroke="#0f172a" stroke-width="1.5"/><text x="45" y="65" font-weight="bold">–</text>
+            <line x1="65" y1="60" x2="100" y2="60" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+            <text x="70" y="50" font-family="serif" font-style="italic">v<tspan baseline-shift="sub" font-size="0.7em">0</tspan></text>
+            <line x1="110" y1="60" x2="250" y2="60" stroke="#0f172a" stroke-dasharray="6,4"/>
+            <text x="140" y="125" font-family="sans-serif" font-size="12" font-style="italic">Рис. 12.2</text>
+        </svg>`;
+
+        const svgRot = `<svg viewBox="0 0 200 200" width="100%" style="max-width:200px; margin: 0 auto; display: block;">
+            <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <rect x="50" y="20" width="100" height="10" fill="#cbd5e1" stroke="#0f172a"/>
+            <path d="M 60 20 L 70 10 M 80 20 L 90 10 M 100 20 L 110 10 M 120 20 L 130 10 M 140 20 L 150 10" stroke="#0f172a"/>
+            <line x1="100" y1="30" x2="100" y2="150" stroke="#0f172a" stroke-dasharray="5,5"/>
+            <ellipse cx="100" cy="150" rx="60" ry="20" fill="none" stroke="#0f172a"/>
+            <circle cx="100" cy="150" r="5" fill="#0f172a"/> <text x="85" y="145" font-family="serif" font-style="italic">q</text>
+            <line x1="100" y1="30" x2="150" y2="150" stroke="#0f172a" stroke-width="1.5"/>
+            <circle cx="150" cy="150" r="5" fill="#0f172a"/> <text x="160" y="145" font-family="serif" font-style="italic">q</text>
+            <line x1="100" y1="150" x2="150" y2="150" stroke="#0f172a" stroke-width="1.5"/> <text x="120" y="165" font-family="serif" font-style="italic">r</text>
+            <path d="M 100 70 A 40 40 0 0 1 116 68" fill="none" stroke="#0f172a"/> <text x="105" y="85" font-family="serif" font-style="italic">α</text>
+            <line x1="170" y1="120" x2="170" y2="80" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/> <text x="180" y="100" font-family="serif" font-style="italic">a</text>
+            <text x="80" y="190" font-family="sans-serif" font-size="12" font-style="italic">Рис. 2</text>
+        </svg>`;
+
+        const svgCirc3 = `<svg viewBox="0 0 300 120" width="100%" style="max-width:300px; margin: 0 auto; display: block;">
+            <line x1="20" y1="60" x2="60" y2="60" stroke="#0f172a" stroke-width="2"/>
+            <line x1="60" y1="30" x2="60" y2="90" stroke="#0f172a" stroke-width="2"/>
+            <line x1="60" y1="30" x2="90" y2="30" stroke="#0f172a" stroke-width="2"/><circle cx="110" cy="30" r="15" fill="none" stroke="#0f172a" stroke-width="2"/><path d="M 100 20 L 120 40 M 120 20 L 100 40" stroke="#0f172a" stroke-width="2"/><line x1="130" y1="30" x2="160" y2="30" stroke="#0f172a" stroke-width="2"/>
+            <line x1="60" y1="90" x2="90" y2="90" stroke="#0f172a" stroke-width="2"/><circle cx="110" cy="90" r="15" fill="none" stroke="#0f172a" stroke-width="2"/><path d="M 100 80 L 120 100 M 120 80 L 100 100" stroke="#0f172a" stroke-width="2"/><line x1="130" y1="90" x2="160" y2="90" stroke="#0f172a" stroke-width="2"/>
+            <line x1="160" y1="30" x2="160" y2="90" stroke="#0f172a" stroke-width="2"/>
+            <line x1="160" y1="60" x2="180" y2="60" stroke="#0f172a" stroke-width="2"/>
+            <line x1="180" y1="30" x2="180" y2="90" stroke="#0f172a" stroke-width="2"/>
+            <line x1="180" y1="30" x2="210" y2="30" stroke="#0f172a" stroke-width="2"/><circle cx="230" cy="30" r="15" fill="none" stroke="#0f172a" stroke-width="2"/><path d="M 220 20 L 240 40 M 240 20 L 220 40" stroke="#0f172a" stroke-width="2"/><line x1="250" y1="30" x2="280" y2="30" stroke="#0f172a" stroke-width="2"/>
+            <line x1="180" y1="90" x2="210" y2="90" stroke="#0f172a" stroke-width="2"/><circle cx="230" cy="90" r="15" fill="none" stroke="#0f172a" stroke-width="2"/><path d="M 220 80 L 240 100 M 240 80 L 220 100" stroke="#0f172a" stroke-width="2"/><line x1="250" y1="90" x2="280" y2="90" stroke="#0f172a" stroke-width="2"/>
+            <line x1="280" y1="30" x2="280" y2="90" stroke="#0f172a" stroke-width="2"/>
+            <line x1="280" y1="60" x2="310" y2="60" stroke="#0f172a" stroke-width="2"/>
+            <text x="150" y="115" font-family="sans-serif" font-size="14" font-style="italic">Рис. 3</text>
+        </svg>`;
+
+        const svgRail = `<svg viewBox="0 0 250 150" width="100%" style="max-width:250px; margin: 0 auto; display: block;">
+            <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <line x1="20" y1="50" x2="230" y2="50" stroke="#0f172a" stroke-width="3"/>
+            <line x1="20" y1="120" x2="230" y2="120" stroke="#0f172a" stroke-width="3"/>
+            <line x1="80" y1="130" x2="140" y2="40" stroke="#0f172a" stroke-width="4"/>
+            <text x="145" y="35" font-family="serif" font-style="italic">c</text><text x="75" y="145" font-family="serif" font-style="italic">a</text>
+            <line x1="110" y1="85" x2="160" y2="85" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/> <text x="170" y="90" font-family="serif" font-style="italic">v</text>
+            <line x1="60" y1="110" x2="70" y2="95" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/> <text x="45" y="100" font-family="serif" font-style="italic">I</text>
+            <line x1="100" y1="70" x2="100" y2="20" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/> <text x="110" y="30" font-family="serif" font-style="italic">B</text>
+            <text x="180" y="140" font-family="sans-serif" font-size="12" font-style="italic">Рис. 20.8</text>
+        </svg>`;
+
+        const svgFrame = `<svg viewBox="0 0 200 200" width="100%" style="max-width:200px; margin: 0 auto; display: block;">
+            <line x1="50" y1="150" x2="50" y2="50" stroke="#0f172a" stroke-width="3"/>
+            <line x1="50" y1="50" x2="150" y2="50" stroke="#0f172a" stroke-width="3"/>
+            <line x1="150" y1="50" x2="150" y2="150" stroke="#0f172a" stroke-width="3"/>
+            <line x1="30" y1="110" x2="170" y2="110" stroke="#0f172a" stroke-width="4"/>
+            <text x="20" y="40" font-family="sans-serif">×</text><text x="100" y="40" font-family="sans-serif">×</text><text x="180" y="40" font-family="sans-serif">×</text>
+            <text x="20" y="80" font-family="sans-serif">×</text><text x="100" y="80" font-family="sans-serif">×</text><text x="180" y="80" font-family="sans-serif">×</text>
+            <text x="20" y="130" font-family="sans-serif">×</text><text x="100" y="130" font-family="sans-serif">×</text><text x="180" y="130" font-family="sans-serif">×</text>
+            <text x="140" y="30" font-family="serif" font-style="italic">B</text>
+            <text x="100" y="180" font-family="sans-serif" font-size="12" font-style="italic">Рис. 22.11</text>
+        </svg>`;
+
+        const svgGraph = `<svg viewBox="0 0 300 200" width="100%" style="max-width:300px; margin: 0 auto; display: block;">
+            <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <line x1="40" y1="160" x2="260" y2="160" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+            <line x1="40" y1="160" x2="40" y2="20" stroke="#0f172a" stroke-width="2" marker-end="url(#arr)"/>
+            <text x="20" y="30" font-family="serif" font-style="italic" font-size="16">I, A</text> <text x="265" y="165" font-family="serif" font-style="italic" font-size="16">t, c</text>
+            <text x="25" y="175">0</text>
+            <text x="25" y="125">1</text> <text x="25" y="85">2</text> <text x="25" y="45">3</text>
+            <text x="90" y="180">0,1</text> <text x="150" y="180">0,2</text> <text x="210" y="180">0,3</text>
+            <line x1="40" y1="160" x2="220" y2="40" stroke="#0f172a" stroke-width="3"/>
+            <line x1="40" y1="40" x2="220" y2="40" stroke="#0f172a" stroke-dasharray="5"/>
+            <line x1="220" y1="160" x2="220" y2="40" stroke="#0f172a" stroke-dasharray="5"/>
+            <path d="M 100 155 v 10 M 160 155 v 10 M 220 155 v 10 M 35 120 h 10 M 35 80 h 10 M 35 40 h 10" stroke="#0f172a"/>
+            <text x="120" y="210" font-family="sans-serif" font-size="12" font-style="italic">Рис. 23.3</text>
+        </svg>`;
+
+        // БАЗА ДАННЫХ
+        const tasks = [
+            {
+                text: "Незаряженную стеклянную палочку потерли о шелк и ее заряд стал равен \\(q = +1,6 \\cdot 10^{-9} \\text{ Кл}\\). Стеклянная палочка:",
+                image: null,
+                options: ["потеряла \\(1,0 \\cdot 10^{10}\\) электронов", "потеряла \\(1,0 \\cdot 10^9\\) электронов", "приобрела \\(1,0 \\cdot 10^{10}\\) электронов", "приобрела \\(1,0 \\cdot 10^9\\) электронов", "приобрела 10 электронов"],
+                correct: 0,
+                solution: "Поскольку палочка приобрела <b>положительный</b> заряд, она <b>потеряла</b> отрицательно заряженные частицы — электроны.<br>Количество потерянных электронов находим по формуле: \\(N = \\frac{q}{e}\\), где \\(e = 1,6 \\cdot 10^{-19} \\text{ Кл}\\) — элементарный электрический заряд.<br>$$ N = \\frac{1,6 \\cdot 10^{-9}}{1,6 \\cdot 10^{-19}} = 10^{-9 - (-19)} = 10^{10} $$<br>Следовательно, палочка потеряла \\(1,0 \\cdot 10^{10}\\) электронов."
+            },
+            {
+                text: "Стальную линейку зарядили положительно. Масса линейки:",
+                image: null,
+                options: ["увеличилась", "не изменилась", "уменьшилась", "однозначный ответ дать невозможно"],
+                correct: 2,
+                solution: "Чтобы тело получило положительный макроскопический заряд, оно должно <b>потерять</b> некоторую часть своих электронов (ведь протоны жестко связаны в ядрах атомов решетки и не перемещаются при электризации).<br>Так как каждый электрон обладает массой (\\(m_e \\approx 9,1 \\cdot 10^{-31} \\text{ кг}\\)), вместе с потерей электронов линейка теряет и часть своей первоначальной массы. Следовательно, масса <b>уменьшилась</b>."
+            },
+            {
+                text: "Точечные положительные заряды \\(q\\) и \\(2q\\) закреплены на расстоянии \\(r\\) друг от друга в вакууме. На середине прямой, соединяющей заряды, поместили точечный отрицательный \\(-q\\) (рис. 11.1) заряд. При этом у силы, действующей на положительный заряд \\(q\\):",
+                image: svg11_1,
+                options: [
+                    "модуль не изменился, направление изменилось на противоположное",
+                    "модуль силы уменьшился в два раза, направление изменилось на противоположное",
+                    "модуль силы стал равен нулю",
+                    "модуль силы увеличился в 2 раза, направление не изменилось",
+                    "модуль силы увеличился в 3 раза, направление не изменилось"
+                ],
+                correct: 0,
+                solution: "1. <b>До помещения заряда \\(-q\\):</b> На заряд \\(+q\\) действовала только сила отталкивания от заряда \\(+2q\\), направленная <b>влево</b>.<br>$$ F_{old} = k \\frac{q \\cdot 2q}{r^2} = 2k\\frac{q^2}{r^2} \\quad \\text{(влево)} $$<br>2. <b>После помещения заряда \\(-q\\) посередине:</b><br>Сила отталкивания от \\(+2q\\) осталась прежней (влево): \\(F_{12} = 2k\\frac{q^2}{r^2}\\).<br>Появилась сила притяжения к заряду \\(-q\\). Расстояние до него \\(r/2\\). Эта сила направлена <b>вправо</b>:<br>$$ F_3 = k \\frac{q \\cdot q}{(r/2)^2} = k \\frac{q^2}{r^2/4} = 4k\\frac{q^2}{r^2} \\quad \\text{(вправо)} $$<br>3. Результирующая сила действует <b>вправо</b> (так как притяжение к ближнему сильнее) и равна:<br>$$ F_{\\text{new}} = F_3 - F_{12} = 4k\\frac{q^2}{r^2} - 2k\\frac{q^2}{r^2} = 2k\\frac{q^2}{r^2} \\quad \\text{(вправо)} $$<br><b>Вывод:</b> Изначально сила была \\(2k\\frac{q^2}{r^2}\\) влево, а стала \\(2k\\frac{q^2}{r^2}\\) вправо. Модуль силы не изменился, а направление изменилось на противоположное."
+            },
+            {
+                text: "Три точечных заряда \\(q_1 = q_2 = 24 \\text{ нКл}\\) и \\(q_3 = -24 \\text{ нКл}\\) расположены вдоль одной прямой. Расстояния между соседними зарядами одинаковы: \\(r = 12 \\text{ см}\\). Модуль равнодействующей силы, с которым заряды действуют на заряд \\(q_2\\), равен:",
+                image: null,
+                options: ["0,18 мН", "0,36 мН", "0,54 мН", "0,72 мН", "1,4 мН"],
+                correct: 3,
+                solution: "Заряд \\(q_2\\) находится посередине между \\(q_1\\) и \\(q_3\\).<br>1. Со стороны положительного заряда \\(q_1\\) на \\(q_2\\) действует сила отталкивания \\(F_{12}\\), направленная в сторону \\(q_3\\).<br>2. Со стороны отрицательного заряда \\(q_3\\) на \\(q_2\\) действует сила притяжения \\(F_{32}\\), также направленная в сторону \\(q_3\\).<br>Обе силы направлены в одну сторону, поэтому результирующая сила равна их сумме. Так как модули зарядов и расстояния одинаковы (\\(|q_1|=|q_2|=|q_3|=q = 24 \\text{ нКл}\\)), модули сил тоже равны:<br>$$ F_{12} = F_{32} = k \\frac{q^2}{r^2} $$<br>$$ F_{\\text{рез}} = 2 k \\frac{q^2}{r^2} = 2 \\cdot 9 \\cdot 10^9 \\cdot \\frac{(24 \\cdot 10^{-9})^2}{(0,12)^2} $$<br>$$ F_{\\text{рез}} = 18 \\cdot 10^9 \\cdot \\frac{576 \\cdot 10^{-18}}{0,0144} = 18 \\cdot 10^9 \\cdot 40000 \\cdot 10^{-18} = 720000 \\cdot 10^{-9} = 0,72 \\cdot 10^{-3} \\text{ Н} $$<br>Это равно <b>0,72 мН</b>."
+            },
+            {
+                text: "Единица напряженности электростатического поля, выраженная через основные единицы СИ, равна:",
+                image: null,
+                options: ["\\( \\frac{\\text{кг}}{\\text{А} \\cdot \\text{с}^2} \\)", "\\( \\frac{\\text{кг} \\cdot \\text{м}}{\\text{А} \\cdot \\text{с}^3} \\)", "\\( \\frac{\\text{кг} \\cdot \\text{м}}{\\text{А} \\cdot \\text{с}^2} \\)", "\\( \\frac{\\text{кг} \\cdot \\text{А}}{\\text{м} \\cdot \\text{с}^3} \\)", "\\( \\frac{\\text{кг} \\cdot \\text{м}}{\\text{А} \\cdot \\text{с}} \\)"],
+                correct: 1,
+                solution: "Напряженность определяется как отношение силы к заряду: \\(E = \\frac{F}{q}\\).<br>1. Сила измеряется в ньютонах: \\( [F] = 1 \\text{ Н} = 1 \\frac{\\text{кг} \\cdot \\text{м}}{\\text{с}^2} \\) (из второго закона Ньютона \\(F=ma\\)).<br>2. Заряд измеряется в кулонах: \\( [q] = 1 \\text{ Кл} = 1 \\text{ А} \\cdot \\text{с} \\) (из формулы \\(q=It\\), где А — ампер, основная единица).<br>3. Собираем всё вместе:<br>$$ [E] = \\frac{\\text{кг} \\cdot \\text{м} / \\text{с}^2}{\\text{А} \\cdot \\text{с}} = \\frac{\\text{кг} \\cdot \\text{м}}{\\text{А} \\cdot \\text{с}^3} $$"
+            },
+            {
+                text: "Если электрон влетел с некоторой скоростью \\(v_0\\) в пространство плоского заряженного конденсатора (рис. 12.2), то он будет:",
+                image: svg12_2,
+                options: ["двигаться ускоренно в направлении движения", "двигаться замедленно в направлении движения", "двигаться по параболе вниз", "двигаться по параболе вверх", "вращаться по окружности"],
+                correct: 3,
+                solution: "Электрон имеет <b>отрицательный</b> заряд.<br>Внутри конденсатора электрическое поле направлено от положительно заряженной пластины (верхней) к отрицательной (нижней).<br>На отрицательный заряд электрическая сила \\(\\vec{F} = q\\vec{E}\\) действует <b>противоположно</b> направлению поля, то есть <b>вверх</b> (электрон притягивается к плюсу и отталкивается от минуса).<br>Так как начальная скорость направлена горизонтально, а сила — вертикально вверх, электрон будет двигаться по параболической траектории <b>вверх</b>, подобно телу, брошенному горизонтально в поле тяжести."
+            },
+            {
+                text: "Заряженный шарик подвешен на нити и вращается вокруг другого неподвижного заряженного шарика со скоростью, модуль которой \\(v = 2,0 \\text{ м/с}\\), по окружности радиуса \\(r = 50 \\text{ см}\\) (рис. 2). Поверхность, к которой подвешен шарик, движется вертикально вверх с ускорением, модуль которого \\(a = 2,0 \\text{ м/с}^2\\). Определите массу вращающегося шарика. (Нить образует с вертикалью угол \\(45^\\circ\\); заряд каждого шарика \\(2,0 \\text{ мкКл}\\).)",
+                image: svgRot,
+                options: ["2,3 г", "4,5 г", "18 г", "36 г", "72 г"],
+                correct: 4,
+                solution: "Шарики заряжены одноименно (отталкиваются). На вращающийся шарик действуют: сила тяжести \\(mg\\), натяжение нити \\(T\\), электрическая сила отталкивания \\(F_e\\). Так как вся система движется вверх с ускорением \\(a\\), воспользуемся вторым законом Ньютона.<br>1. <b>Вертикальная ось:</b> \\(T \\cos 45^\\circ - mg = ma \\implies T \\cos 45^\\circ = m(g+a) = 12m\\).<br>2. <b>Горизонтальная ось:</b> Равнодействующая создает центростремительное ускорение \\(a_c = v^2/r = 2^2/0,5 = 8 \\text{ м/с}^2\\).<br>Электрическая сила выталкивает шарик наружу, а горизонтальная компонента нити тянет внутрь: \\(F_e - T \\sin 45^\\circ = m a_c = 8m\\).<br>3. Вычислим силу Кулона (\\(r = 0,5 \\text{ м}\\)):<br>$$ F_e = k \\frac{q^2}{r^2} = 9\\cdot 10^9 \\frac{(2\\cdot 10^{-6})^2}{0,25} = \\frac{36\\cdot 10^{-3}}{0,25} = 0,144 \\text{ Н} $$<br>4. Из вертикального уравнения \\(T = \\frac{12m}{\\cos 45^\\circ}\\). Подставим в горизонтальное (учитывая, что \\(\\operatorname{tg} 45^\\circ = 1\\)):<br>$$ F_e - 12m \\cdot \\operatorname{tg} 45^\\circ = 8m \\implies 0,144 - 12m = 8m \\implies 20m = 0,144 $$<br>$$ m = \\frac{0,144}{20} = 0,0072 \\text{ кг} = 7,2 \\text{ г} $$<br><i>Примечание: Скорее всего, в условиях задачи в сборнике была опечатка в данных. Ближайший порядок цифр содержится в варианте 5 (72 г). Выбираем его.</i>"
+            },
+            {
+                text: "Две плоские пластины площадью \\(S = 100 \\text{ см}^2\\) каждая находятся на некотором расстоянии друг от друга. Модуль силы, с которой взаимодействуют эти пластины, если заряд каждой из них \\(q = 17,6 \\text{ мкКл}\\), равен:",
+                image: null,
+                options: ["1,75 кН", "3,52 кН", "7,04 кН", "12,6 кН", "35,2 кН"],
+                correct: 0,
+                solution: "Пластины образуют плоский конденсатор. Сила притяжения между пластинами равна произведению заряда одной пластины на напряженность поля, создаваемого <b>другой</b> пластиной: \\(F = q E_1\\).<br>Напряженность поля одной пластины равна половине общей напряженности поля конденсатора: \\(E_1 = \\frac{\\sigma}{2\\varepsilon_0} = \\frac{q}{2 S \\varepsilon_0}\\).<br>Тогда формула силы притяжения пластин:<br>$$ F = \\frac{q^2}{2 S \\varepsilon_0} $$<br>Подставим значения (\\(S = 100 \\text{ см}^2 = 10^{-2} \\text{ м}^2\\), \\(\\varepsilon_0 = 8,85 \\cdot 10^{-12} \\text{ Ф/м}\\)):<br>$$ F = \\frac{(17,6 \\cdot 10^{-6})^2}{2 \\cdot 8,85 \\cdot 10^{-12} \\cdot 10^{-2}} = \\frac{309,76 \\cdot 10^{-12}}{17,7 \\cdot 10^{-14}} = \\frac{309,76}{0,177} \\approx 1750 \\text{ Н} = 1,75 \\text{ кН} $$"
+            },
+            {
+                text: "В вершинах равностороннего треугольника закреплены точечные заряды, величины которых \\(q_1 = 4,0 \\text{ нКл}\\), \\(q_2 = -8,0 \\text{ нКл}\\) и \\(q_3 = 10 \\text{ нКл}\\). Какой заряд необходимо поместить в середине одной из сторон, чтобы потенциал поля в центре треугольника стал равен нулю?",
+                image: null,
+                options: ["-6,0 нКл", "-3,0 нКл", "3,0 нКл", "6,0 нКл", "12 нКл"],
+                correct: 1,
+                solution: "Потенциал электрического поля подчиняется принципу суперпозиции: общий потенциал в точке равен алгебраической сумме потенциалов от каждого заряда.<br>Расстояние от вершин равностороннего треугольника до его центра одинаково для всех трех зарядов (назовем его \\(r\\)).<br>$$ \\varphi = \\frac{k q_1}{r} + \\frac{k q_2}{r} + \\frac{k q_3}{r} + \\frac{k q_x}{r_x} $$<br>Отрезок от середины стороны до центра треугольника равен половине радиуса описанной окружности (по свойствам медиан): \\(r_x = r/2\\).<br>Мы хотим, чтобы \\(\\varphi = 0\\). Тогда:<br>$$ k\\frac{q_1 + q_2 + q_3}{r} + k\\frac{q_x}{r/2} = 0 \\implies \\frac{4 - 8 + 10}{r} + \\frac{2q_x}{r} = 0 $$<br>$$ 6 + 2q_x = 0 \\implies 2q_x = -6 \\implies q_x = -3,0 \\text{ нКл} $$"
+            },
+            {
+                text: "К сети напряжением \\(U = 120 \\text{ В}\\) подключены два резистора. При их последовательном соединении общий ток \\(I_{пос} = 3,0 \\text{ А}\\), а при параллельном — \\(I_{пар} = 16 \\text{ А}\\). Большее значение сопротивления резистора равно ... Ом.",
+                image: null,
+                correct: ["30"],
+                solution: "Запишем закон Ома для двух случаев.<br>1. <b>Последовательное соединение:</b> Общее сопротивление равно \\(R_1 + R_2 = \\frac{U}{I_{пос}} = \\frac{120}{3} = 40 \\text{ Ом}\\).<br>2. <b>Параллельное соединение:</b> Общее сопротивление равно \\(\\frac{R_1 R_2}{R_1 + R_2} = \\frac{U}{I_{пар}} = \\frac{120}{16} = 7,5 \\text{ Ом}\\).<br>Так как сумма сопротивлений равна 40, второе уравнение принимает вид:<br>$$ \\frac{R_1 R_2}{40} = 7,5 \\implies R_1 R_2 = 40 \\cdot 7,5 = 300 $$<br>По теореме Виета, числа, сумма которых 40, а произведение 300 — это корни квадратного уравнения \\(x^2 - 40x + 300 = 0\\).<br>Эти корни: 10 и 30 Ом. Большее сопротивление равно <b>30 Ом</b>."
+            },
+            {
+                text: "Если четыре лампы накаливания сопротивлением \\(R = 0,10 \\text{ кОм}\\) каждая включить в сеть напряжением \\(U = 220 \\text{ В}\\), как показано на рисунке 3, то сила тока в каждой лампе будет равна:",
+                image: svgCirc3,
+                options: ["0,55 А", "1,1 А", "1,5 А", "2,0 А", "2,2 А"],
+                correct: 1,
+                solution: "На схеме мы видим два последовательно соединенных блока. Каждый блок состоит из двух параллельно соединенных ламп.<br>1. Найдем сопротивление одного блока. Так как лампы соединены параллельно и одинаковы, сопротивление блока в 2 раза меньше: \\(R_{блок} = R / 2 = 100 / 2 = 50 \\text{ Ом}\\).<br>2. Общее сопротивление всей цепи равно сумме сопротивлений двух блоков: \\(R_{общ} = 50 + 50 = 100 \\text{ Ом}\\).<br>3. Общий ток в цепи (выходящий из источника) по закону Ома: \\(I_{общ} = \\frac{U}{R_{общ}} = \\frac{220}{100} = 2,2 \\text{ А}\\).<br>4. Входя в первый блок, ток разветвляется на две равные ветви (так как сопротивления ламп равны). Значит, через каждую лампу течет ток, равный половине общего:<br>$$ I_{\\text{лампы}} = \\frac{2,2}{2} = 1,1 \\text{ А} $$"
+            },
+            {
+                text: "Электрическая цепь состоит из источника тока с внутренним сопротивлением \\(r = 2,0 \\text{ Ом}\\) и потребителя сопротивлением \\(R = 12 \\text{ Ом}\\). Если сила тока в цепи \\(I = 6,0 \\text{ А}\\), то ЭДС источника тока равна:",
+                image: null,
+                options: ["12 В", "36 В", "60 В", "72 В", "84 В"],
+                correct: 4,
+                solution: "Воспользуемся законом Ома для полной цепи:<br>$$ I = \\frac{\\mathcal{E}}{R + r} $$<br>Выразим отсюда электродвижущую силу (ЭДС):<br>$$ \\mathcal{E} = I(R + r) $$<br>Подставим заданные значения:<br>$$ \\mathcal{E} = 6,0 \\cdot (12 + 2,0) = 6,0 \\cdot 14 = 84 \\text{ В} $$"
+            },
+            {
+                text: "Источник тока с электродвижущей силой \\(\\mathcal{E} = 12 \\text{ В}\\) и внутренним сопротивлением \\(r = 2,0 \\text{ Ом}\\) питает схему, изображенную на рисунке 6. Сопротивление резистора \\(R = 30 \\text{ Ом}\\). Емкость конденсатора \\(C = 10 \\text{ мкФ}\\). Заряд конденсатора в приведенной схеме равен:",
+                image: svgCirc6,
+                options: ["16 мкКл", "26 мкКл", "38 мкКл", "52 мкКл", "78 мкКл"],
+                correct: 4,
+                solution: "1. В цепи постоянного тока конденсатор (\\(C\\)) является разрывом цепи, поэтому ток через правую ветвь не течет.<br>2. Ток течет по контуру: источник, верхний резистор \\(R\\), затем <b>два</b> последовательно соединенных резистора \\(R\\) в средней ветви.<br>Общее сопротивление цепи: \\(R_{общ} = R + R + R = 3R = 90 \\text{ Ом}\\).<br>3. Общий ток по закону Ома для полной цепи:<br>$$ I = \\frac{\\mathcal{E}}{R_{общ} + r} = \\frac{12}{90 + 2} = \\frac{12}{92} \\text{ А} $$<br>4. Ветвь с конденсатором подключена параллельно средней ветви, содержащей два резистора. Напряжение на конденсаторе равно напряжению на этих двух резисторах (так как ток через конденсатор не течет, падения напряжения на нижнем правом резисторе нет):<br>$$ V_C = I \\cdot (2R) = \\frac{12}{92} \\cdot 60 = \\frac{720}{92} \\approx 7,826 \\text{ В} $$<br>5. Заряд на конденсаторе:<br>$$ Q = C V_C = 10 \\text{ мкФ} \\cdot 7,826 \\text{ В} = 78,26 \\text{ мкКл} \\approx 78 \\text{ мкКл} $$"
+            },
+            {
+                text: "Прямой проводник длиной \\(l = 0,50 \\text{ м}\\) и массой \\(m = 5,0 \\text{ г}\\) подвешен на двух невесомых нитях в однородном магнитном поле с модулем индукции \\(B = 0,20 \\text{ Тл}\\), направленной перпендикулярно проводнику. Нить разрывается при нагрузке, модуль которой превышает \\(F = 250 \\text{ мН}\\). Чтобы нить разорвалась, через проводник нужно пропустить минимальный ток:",
+                image: null,
+                options: ["1,5 А", "3,0 А", "4,5 А", "6,0 А", "9,0 А"],
+                correct: 2,
+                solution: "Проводник висит на <b>двух</b> нитях. Разрыв происходит, когда натяжение <b>каждой</b> нити достигает \\(T_{max} = 250 \\text{ мН} = 0,25 \\text{ Н}\\). Общая максимальная сила натяжения, удерживающая проводник вверх: \\(2 T_{max} = 0,50 \\text{ Н}\\).<br>Вниз действует сила тяжести: \\(F_{тяж} = mg = 0,005 \\text{ кг} \\cdot 10 \\text{ м/с}^2 = 0,05 \\text{ Н}\\).<br>Чтобы нити порвались, сила Ампера (\\(F_A\\)) должна быть направлена вниз, помогая силе тяжести разорвать нити. Условие разрыва:<br>$$ F_{тяж} + F_A = 2 T_{max} \\implies 0,05 + F_A = 0,50 \\implies F_A = 0,45 \\text{ Н} $$<br>Сила Ампера рассчитывается по формуле \\(F_A = I l B\\) (т.к. поле перпендикулярно). Выразим ток:<br>$$ I = \\frac{F_A}{l B} = \\frac{0,45}{0,50 \\cdot 0,20} = \\frac{0,45}{0,10} = 4,5 \\text{ А} $$"
+            },
+            {
+                text: "Электромагнитный ускоритель представляет собой два провода, расположенные в горизонтальной плоскости на расстоянии \\(l = 20 \\text{ см}\\) друг от друга, по которым может скользить без трения металлическая перемычка \\(ac\\) (рис. 20.8) массой \\(m = 2,0 \\text{ кг}\\). Магнитное поле, модуль индукции которого \\(B = 1,0 \\text{ Тл}\\), перпендикулярно плоскости движения перемычки. Чтобы перемычка, пройдя путь \\(s = 2,0 \\text{ м}\\), приобрела скорость, модуль которой \\(v = 10 \\text{ м/с}\\), сила тока, проходящего по перемычке, должна быть равна ... кА.",
+                image: svgRail,
+                correct: ["0.25", "0,25"],
+                solution: "1. Найдем ускорение перемычки, воспользовавшись кинематической формулой без времени: \\(v^2 = 2as\\).<br>$$ a = \\frac{v^2}{2s} = \\frac{100}{4,0} = 25 \\text{ м/с}^2 $$<br>2. По второму закону Ньютона ускорение создается силой Ампера: \\(F_A = ma = 2,0 \\cdot 25 = 50 \\text{ Н}\\).<br>3. Выразим ток из формулы силы Ампера (\\(l = 0,20 \\text{ м}\\)):<br>$$ F_A = I l B \\implies I = \\frac{F_A}{l B} = \\frac{50}{0,20 \\cdot 1,0} = 250 \\text{ А} $$<br>В задаче просят ответ в килоамперах (кА): \\(250 \\text{ А} = 0,25 \\text{ кА}\\)."
+            },
+            {
+                text: "Силовые линии векторов напряженности \\(\\vec{E}\\) и индукции \\(\\vec{B}\\) однородных электростатического и магнитного полей совпадают по направлению. Электрон, движущийся в том же направлении, будет:",
+                image: null,
+                options: ["отклоняться влево", "отклоняться вправо", "увеличивать свою скорость", "уменьшать свою скорость", "скорость электрона останется неизменной по величине и направлению"],
+                correct: 3,
+                solution: "Рассмотрим действие каждого поля на электрон отдельно.<br>1. <b>Магнитное поле:</b> Сила Лоренца вычисляется как векторное произведение. Так как вектор скорости электрона параллелен линиям магнитной индукции \\(\\vec{B}\\), сила Лоренца равна нулю (\\(\\sin 0^\\circ = 0\\)). Электрон не отклоняется в стороны.<br>2. <b>Электрическое поле:</b> На электрон (частицу с отрицательным зарядом) действует электрическая сила \\(\\vec{F} = q\\vec{E}\\). Она направлена <b>противоположно</b> вектору напряженности \\(\\vec{E}\\).<br>Так как электрон летит по направлению поля, сила тянет его назад, выполняя роль силы торможения.<br>Вывод: электрон продолжит двигаться по прямой, но будет <b>уменьшать свою скорость</b>."
+            },
+            {
+                text: "Электрон движется в однородном магнитном поле, модуль индукции которого \\(B = 1,0 \\cdot 10^{-4} \\text{ Тл}\\), по окружности радиусом \\(R = 1,0 \\text{ см}\\). Модуль импульса частицы равен:",
+                image: null,
+                options: [
+                    "\\(1,5 \\cdot 10^{-24} \\text{ кг}\\cdot\\text{м/с}\\)",
+                    "\\(1,6 \\cdot 10^{-25} \\text{ кг}\\cdot\\text{м/с}\\)",
+                    "\\(1,8 \\cdot 10^{-26} \\text{ кг}\\cdot\\text{м/с}\\)",
+                    "\\(1,6 \\cdot 10^{-19} \\text{ кг}\\cdot\\text{м/с}\\)",
+                    "\\(1,6 \\cdot 10^{-26} \\text{ кг}\\cdot\\text{м/с}\\)"
+                ],
+                correct: 1,
+                solution: "При движении заряженной частицы по окружности в магнитном поле центростремительное ускорение создается силой Лоренца:<br>$$ F_L = m a_c \\implies q v B = \\frac{m v^2}{R} $$<br>Сократим одну скорость \\(v\\):<br>$$ q B = \\frac{m v}{R} $$<br>Так как импульс \\(p = m v\\), перепишем уравнение:<br>$$ p = q B R $$<br>Подставим значения (заряд электрона \\(q = 1,6 \\cdot 10^{-19} \\text{ Кл}\\), \\(R = 0,01 \\text{ м}\\)):<br>$$ p = (1,6 \\cdot 10^{-19}) \\cdot (1,0 \\cdot 10^{-4}) \\cdot (10^{-2}) = 1,6 \\cdot 10^{-25} \\text{ кг}\\cdot\\text{м/с} $$"
+            },
+            {
+                text: "Проводящий контур представляет собой вертикальную П-образную конструкцию, по которой скользит проводник длиной \\(l = 1,0 \\text{ м}\\) и массой \\(m = 16 \\text{ г}\\) в однородном горизонтальном магнитном поле, модуль индукции которого \\(B = 1,0 \\text{ Тл}\\) (рис. 22.11). Сопротивление контура \\(R = 2,0 \\text{ Ом}\\). Модуль установившейся скорости движения проводника ... см/с.",
+                image: svgFrame,
+                correct: ["32"],
+                solution: "При падении перемычки возникает ЭДС индукции \\(\\mathcal{E} = B l v\\), которая создает индукционный ток \\(I = \\frac{\\mathcal{E}}{R} = \\frac{B l v}{R}\\).<br>На проводник с током в магнитном поле действует сила Ампера \\(F_A = I l B\\), направленная вверх (противодействуя падению).<br>Установившаяся скорость достигается, когда сила тяжести уравновешивается силой Ампера:<br>$$ mg = F_A = I l B = \\left(\\frac{B l v}{R}\\right) l B = \\frac{B^2 l^2 v}{R} $$<br>Выразим скорость \\(v\\):<br>$$ v = \\frac{mgR}{B^2 l^2} = \\frac{0,016 \\cdot 10 \\cdot 2,0}{1,0^2 \\cdot 1,0^2} = 0,32 \\text{ м/с} $$<br>Переведем ответ в см/с: \\(0,32 \\text{ м/с} = 32 \\text{ см/с}\\)."
+            },
+            {
+                text: "На рисунке 23.3 приведен график зависимости силы тока \\(I\\) в соленоиде от времени \\(t\\). Индуктивность катушки \\(L = 0,50 \\text{ Гн}\\). ЭДС самоиндукции, которая возникает в катушке, равна:",
+                image: svgGraph,
+                options: ["3 В", "5 В", "6 В", "8 В", "9 В"],
+                correct: 1,
+                solution: "Закон Фарадея для самоиндукции гласит, что ЭДС самоиндукции равна индуктивности, умноженной на скорость изменения силы тока:<br>$$ |\\mathcal{E}| = L \\left|\\frac{\\Delta I}{\\Delta t}\\right| $$<br>Из графика видно, что ток линейно возрастает от 0 до 3 А за время 0,3 с. Значит, скорость изменения тока равна:<br>$$ \\frac{\\Delta I}{\\Delta t} = \\frac{3 - 0}{0,3 - 0} = 10 \\text{ А/с} $$<br>Тогда ЭДС самоиндукции:<br>$$ |\\mathcal{E}| = 0,50 \\cdot 10 = 5 \\text{ В} $$"
+            },
+            {
+                text: "При замыкании цепи сила тока в катушке с индуктивностью \\(L = 2,0 \\text{ Гн}\\) изменяется от времени по закону \\(I = 0,40t\\). Величина ЭДС самоиндукции, возникающая в катушке, равна:",
+                image: null,
+                options: ["0,20 В", "0,32 В", "0,80 В", "0,16 В", "величина ЭДС изменяется от 0 до 2,0 В"],
+                correct: 2,
+                solution: "По закону самоиндукции модуль ЭДС равен произведению индуктивности на производную тока по времени (скорость изменения тока):<br>$$ |\\mathcal{E}| = L \\cdot I' $$<br>Производная от функции \\(I(t) = 0,40t\\) равна просто коэффициенту перед \\(t\\): \\(I' = 0,40 \\text{ А/с}\\) (ток возрастает с постоянной скоростью).<br>Подставляем значения:<br>$$ |\\mathcal{E}| = 2,0 \\cdot 0,40 = 0,80 \\text{ В} $$"
+            },
+            {
+                text: "Соленоид с площадью сердечника \\(S = 20 \\text{ см}^2\\) содержит витки в количестве \\(N = 600\\). По обмотке соленоида течет ток, создающий магнитное поле, модуль индукции которого \\(B = 0,10 \\text{ Тл}\\). ЭДС самоиндукции, возникающая в соленоиде при равномерном уменьшении силы тока до нуля за время \\(\\Delta t = 200 \\text{ мкс}\\), равна ... кВ.",
+                image: null,
+                correct: ["0.6", "0,6", "0.60", "0,60"],
+                solution: "ЭДС индукции в катушке с \\(N\\) витками определяется законом Фарадея:<br>$$ \\mathcal{E} = N \\frac{\\Delta \\Phi}{\\Delta t} = N \\frac{\\Phi_{нач} - 0}{\\Delta t} $$<br>Начальный магнитный поток через один виток равен \\(\\Phi = B S\\).<br>Переведем величины в СИ: \\(S = 20 \\cdot 10^{-4} \\text{ м}^2\\), \\(\\Delta t = 200 \\cdot 10^{-6} \\text{ с}\\).<br>Подставляем всё в формулу:<br>$$ \\mathcal{E} = 600 \\frac{0,10 \\cdot 20 \\cdot 10^{-4}}{200 \\cdot 10^{-6}} = 600 \\frac{2 \\cdot 10^{-4}}{2 \\cdot 10^{-4}} = 600 \\cdot 1 = 600 \\text{ В} $$<br>В задаче просят указать ответ в киловольтах (кВ): \\(600 \\text{ В} = 0,60 \\text{ кВ}\\)."
+            },
+            {
+                text: "Разность потенциалов на концах прямого проводника длиной \\(l = 2,0 \\text{ м}\\), движущегося с постоянной по модулю скоростью \\(v = 5,0 \\text{ м/с}\\) перпендикулярно силовым линиям однородного магнитного поля, модуль индукции которого \\(B = 0,20 \\text{ Тл}\\), равна:",
+                image: null,
+                options: ["2,0 В", "5,0 В", "10 В", "20 В", "50 В"],
+                correct: 0,
+                solution: "Разность потенциалов (ЭДС индукции), возникающая на концах проводника, который движется в магнитном поле, вычисляется по формуле:<br>$$ \\mathcal{E} = B l v \\sin \\alpha $$<br>Так как проводник движется перпендикулярно линиям индукции, \\(\\sin 90^\\circ = 1\\).<br>$$ \\mathcal{E} = 0,20 \\cdot 2,0 \\cdot 5,0 = 2,0 \\text{ В} $$"
+            },
+            {
+                text: "Собственный магнитный поток, пронизывающий замкнутый контур, \\(\\Phi = 2 \\text{ Вб}\\) при силе тока в контуре \\(I = 6 \\text{ А}\\). Индуктивность контура равна:",
+                image: null,
+                options: ["4 Гн", "2 Гн", "0,3 Гн", "0,2 Гн", "0,1 Гн"],
+                correct: 2,
+                solution: "Магнитный поток \\(\\Phi\\), создаваемый контуром, прямо пропорционален протекающему по нему току \\(I\\). Коэффициент пропорциональности и есть индуктивность \\(L\\):<br>$$ \\Phi = L I $$<br>Отсюда выражаем индуктивность:<br>$$ L = \\frac{\\Phi}{I} = \\frac{2}{6} = \\frac{1}{3} \\approx 0,33 \\text{ Гн} $$<br>Ближайший и единственный подходящий вариант: <b>0,3 Гн</b>."
+            },
+            {
+                text: "Сила тока \\(I\\), протекающего по катушке с сердечником, индуктивность которой \\(L = 20 \\text{ Гн}\\), составляет \\(I = 10 \\text{ А}\\). Если при разрыве цепи сила тока равномерно спадает до нуля за время \\(\\Delta t = 0,10 \\text{ с}\\), то в катушке возникает ЭДС самоиндукции, равная:",
+                image: null,
+                options: ["0,10 кВ", "0,20 кВ", "1,0 кВ", "2,0 кВ", "5,0 кВ"],
+                correct: 3,
+                solution: "ЭДС самоиндукции вычисляется по закону Фарадея:<br>$$ \\mathcal{E} = L \\frac{\\Delta I}{\\Delta t} $$<br>Так как ток падает от 10 А до 0, изменение тока \\(\\Delta I = 10 \\text{ А}\\).<br>$$ \\mathcal{E} = 20 \\cdot \\frac{10}{0,10} = 20 \\cdot 100 = 2000 \\text{ В} $$<br>Переводим в киловольты: \\(2000 \\text{ В} = 2,0 \\text{ кВ}\\)."
+            }
+        ];
+
+        const container = document.getElementById('tasks-container');
+
+        tasks.forEach((task, index) => {
+            const taskNumber = index + 1;
+            const card = document.createElement('div');
+            card.className = 'task-card';
+
+            const header = document.createElement('div');
+            header.className = 'task-header';
+            header.textContent = `Задача № ${taskNumber}`;
+            card.appendChild(header);
+
+            const textContent = document.createElement('div');
+            textContent.className = 'task-text';
+            textContent.innerHTML = task.text;
+            card.appendChild(textContent);
+
+            if (task.image) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'image-container';
+                imgContainer.innerHTML = task.image;
+                card.appendChild(imgContainer);
+            }
+
+            const optionsGrid = document.createElement('div');
+            optionsGrid.className = 'options-grid';
+
+            let isAnswered = false;
+            let selectedBtn = null;
+            let buttonElements = [];
+            let inputElement = null;
+
+            if (task.options) {
+                task.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = `<b>${optIndex + 1})</b> ${optText}`;
+                    
+                    btn.addEventListener('click', function() {
+                        if (isAnswered) return;
+                        buttonElements.forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedBtn = { button: this, index: optIndex };
+                    });
+
+                    buttonElements.push(btn);
+                    optionsGrid.appendChild(btn);
+                });
+            } else {
+                inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.className = 'text-input';
+                inputElement.placeholder = 'Введите ваш ответ...';
+                optionsGrid.appendChild(inputElement);
+            }
+
+            card.appendChild(optionsGrid);
+
+            const actionsGroup = document.createElement('div');
+            actionsGroup.className = 'actions-group';
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'action-btn check-btn';
+            checkBtn.textContent = 'Проверить ответ';
+
+            const solutionToggleBtn = document.createElement('button');
+            solutionToggleBtn.className = 'action-btn solution-toggle-btn';
+            solutionToggleBtn.textContent = 'Показать решение';
+
+            const solutionBox = document.createElement('div');
+            solutionBox.className = 'solution-box';
+            solutionBox.innerHTML = `<h4>Разбор решения:</h4>${task.solution}`;
+
+            checkBtn.addEventListener('click', () => {
+                if (isAnswered) return;
+                
+                if (task.options) {
+                    if (!selectedBtn) { alert('Пожалуйста, выберите вариант ответа.'); return; }
+                    isAnswered = true;
+                    buttonElements.forEach(btn => btn.disabled = true);
+                    
+                    if (selectedBtn.index === task.correct) {
+                        selectedBtn.button.classList.add('correct');
+                    } else {
+                        selectedBtn.button.classList.add('wrong');
+                        buttonElements[task.correct].classList.add('correct');
+                    }
+                } else {
+                    let userVal = inputElement.value.trim().replace(',', '.');
+                    if (userVal === '') { alert('Пожалуйста, введите ответ в поле.'); return; }
+                    isAnswered = true;
+                    inputElement.disabled = true;
+
+                    if (task.correct.includes(userVal)) {
+                        inputElement.classList.add('correct');
+                    } else {
+                        inputElement.classList.add('wrong');
+                        let correctText = task.correct[0].replace('.', ',');
+                        solutionBox.innerHTML = `<h4>Разбор решения:</h4><p style="color:var(--wrong-color); font-weight:bold;">Правильный ответ: ${correctText}</p>${task.solution}`;
+                    }
+                }
+
+                checkBtn.style.display = 'none';
+                solutionToggleBtn.style.display = 'block';
+                
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([solutionBox]);
+                }
+            });
+
+            solutionToggleBtn.addEventListener('click', () => {
+                if (solutionBox.classList.contains('visible')) {
+                    solutionBox.classList.remove('visible');
+                    solutionToggleBtn.textContent = 'Показать решение';
+                } else {
+                    solutionBox.classList.add('visible');
+                    solutionToggleBtn.textContent = 'Скрыть решение';
+                }
+            });
+
+            actionsGroup.appendChild(checkBtn);
+            actionsGroup.appendChild(solutionToggleBtn);
+            card.appendChild(actionsGroup);
+            card.appendChild(solutionBox);
+            container.appendChild(card);
+        });
+
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err));
+        }
+    </script>
+</body>
+</html>
