@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Колебания и Волны</title>
+    
+    <script>
+        window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, chtml: { scale: 1.1 } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb; --primary-hover: #1d4ed8; --bg-color: #f8fafc;
+            --card-bg: #ffffff; --text-main: #0f172a; --correct-color: #10b981; --wrong-color: #ef4444;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-weight: 500; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; line-height: 1.7; font-size: 1.05rem; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 20px; font-weight: 800; }
+
+        .nav-menu { text-align: center; margin-bottom: 30px; }
+        .nav-menu a { text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin: 0 5px; transition: 0.2s; display: inline-block; margin-bottom: 10px; }
+        .nav-menu a.active { background-color: var(--primary-color); color: white; }
+        .nav-menu a:not(.active) { background-color: #cbd5e1; color: var(--text-main); }
+        .nav-menu a:not(.active):hover { background-color: #94a3b8; }
+
+        .task-card { background-color: var(--card-bg); border-radius: 12px; padding: 24px; margin-bottom: 28px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; overflow: hidden; }
+        .task-header { font-weight: 700; font-size: 1.25rem; margin-bottom: 16px; color: var(--primary-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .task-text { margin-bottom: 20px; overflow-wrap: break-word; word-wrap: break-word; }
+        .hint { font-size: 0.95rem; color: #64748b; font-weight: 600; display: block; margin-top: 10px; }
+
+        .image-container { margin: 20px 0; text-align: center; background-color: #f1f5f9; border: 1px dashed #cbd5e1; padding: 20px; border-radius: 8px; overflow-x: auto; }
+        
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        
+        .option-btn { background-color: #f8fafc; border: 2px solid #cbd5e1; color: var(--text-main); padding: 14px 20px; border-radius: 8px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary-color); background-color: #eff6ff; }
+        .option-btn.selected { background-color: #dbeafe; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        .option-btn.correct, .text-input.correct { background-color: var(--correct-color) !important; color: white !important; border-color: var(--correct-color) !important; }
+        .option-btn.wrong, .text-input.wrong { background-color: var(--wrong-color) !important; color: white !important; border-color: var(--wrong-color) !important; }
+
+        .text-input { width: 100%; max-width: 300px; padding: 14px 16px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .text-input:focus { border-color: var(--primary-color); }
+
+        .actions-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .action-btn { padding: 14px 24px; color: white; border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; transition: background-color 0.2s; font-weight: 700; flex: 1; min-width: 180px; text-align: center; }
+        .check-btn { background-color: var(--primary-color); }
+        .check-btn:hover { background-color: var(--primary-hover); }
+        .check-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .solution-toggle-btn { background-color: #f59e0b; display: none; }
+        .solution-toggle-btn:hover { background-color: #d97706; }
+
+        .solution-box { display: none; margin-top: 24px; background-color: #f0fdf4; border: 2px solid #bbf7d0; padding: 24px; border-radius: 8px; color: #166534; overflow-x: auto; overflow-wrap: break-word; word-wrap: break-word; }
+        .solution-box.visible { display: block; animation: fadeIn 0.4s ease-out; }
+        .solution-box h4 { margin-top: 0; color: #15803d; margin-bottom: 16px; font-size: 1.15rem; font-weight: 800; }
+        .svg-solution { display: block; margin: 20px auto; background: white; padding: 10px; border-radius: 8px; border: 1px solid #bbf7d0; max-width: 400px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) { body { padding: 12px; font-size: 1rem; } .task-card { padding: 18px; } .actions-group { flex-direction: column; } .action-btn { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Интенсив</h1>
+        <div class="nav-menu">
+            <a href="index.html">Механика</a>
+            <a href="mkt.html">МКТ и Термодинамика</a>
+            <a href="electro.html">Электричество и Магнетизм</a>
+            <a href="statics.html">Статика и Гидростатика</a>
+            <a href="waves.html" class="active">Колебания и Волны</a>
+        </div>
+        <div id="tasks-container"></div>
+    </div>
+
+    <script>
+        // --- ВЕКТОРНЫЕ РИСУНКИ ---
+        
+        // Волны: Рис 1
+        const svgWave = `<svg viewBox="0 0 350 200" width="100%" style="max-width:350px; margin: 0 auto; display: block;">
+            <defs><marker id="arrW" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            <line x1="40" y1="180" x2="40" y2="20" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arrW)"/>
+            <line x1="20" y1="100" x2="330" y2="100" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arrW)"/>
+            <text x="10" y="15" font-family="serif" font-style="italic">y, <tspan font-family="sans-serif" font-style="normal">м</tspan></text>
+            <text x="320" y="120" font-family="serif" font-style="italic">x, <tspan font-family="sans-serif" font-style="normal">м</tspan></text>
+            <text x="25" y="115">0</text>
+            
+            <!-- Идеальная синусоида (старт из нижней точки) -->
+            <path d="M 40 160 Q 60 160 80 100 T 120 40 T 160 100 T 200 160 T 240 100 T 280 40" fill="none" stroke="#0f172a" stroke-width="2"/>
+            
+            <!-- Засечки и метки -->
+            <line x1="80" y1="95" x2="80" y2="105" stroke="#0f172a" stroke-width="1.5"/> <text x="65" y="120">1,0</text>
+            <line x1="120" y1="95" x2="120" y2="105" stroke="#0f172a" stroke-width="1.5"/> <text x="105" y="85">2,0</text>
+            <line x1="160" y1="95" x2="160" y2="105" stroke="#0f172a" stroke-width="1.5"/> <text x="145" y="120">3,0</text>
+            <line x1="200" y1="95" x2="200" y2="105" stroke="#0f172a" stroke-width="1.5"/> <text x="185" y="85">4,0</text>
+            <line x1="240" y1="95" x2="240" y2="105" stroke="#0f172a" stroke-width="1.5"/> <text x="225" y="85">5,0</text>
+            
+            <text x="160" y="195" font-family="sans-serif" font-size="14" font-style="italic">Рис. 1</text>
+        </svg>`;
+
+        const tasks = [
+            {
+                text: "Если уравнение движения тела, совершающего гармонические колебания, имеет вид \\(x = 0,1 \\sin\\left(10\\pi t + \\frac{\\pi}{3}\\right)\\) (м), то амплитуда и частота колебаний равны:",
+                image: null,
+                options: ["0,1 м; 1 Гц", "0,1 см; 5 Гц", "0,1 м; \\(5\\pi\\) Гц", "0,1 м; 5 Гц", "0,1 м; 10 Гц"],
+                correct: 3,
+                solution: "Уравнение гармонических колебаний в общем виде записывается как:<br>$$ x(t) = A \\sin(\\omega t + \\varphi_0) $$<br>Сравнивая его с заданным уравнением \\(x = 0,1 \\sin(10\\pi t + \\pi/3)\\), определяем параметры:<br>1. Амплитуда колебаний (множитель перед синусом): \\(A = 0,1 \\text{ м}\\).<br>2. Циклическая частота (множитель перед \\(t\\)): \\(\\omega = 10\\pi \\text{ рад/с}\\).<br><br>Обычная частота \\(\\nu\\) связана с циклической формулой \\(\\omega = 2\\pi \\nu\\). Выразим её:<br>$$ \\nu = \\frac{\\omega}{2\\pi} = \\frac{10\\pi}{2\\pi} = 5 \\text{ Гц} $$<br>Следовательно, правильный ответ: <b>0,1 м; 5 Гц</b>."
+            },
+            {
+                text: "Масса горизонтального пружинного маятника \\(m = 0,50 \\text{ кг}\\), жесткость пружины \\(k = 100 \\text{ Н/м}\\). Тело сместили из положения равновесия на величину \\(x_0 = 10 \\text{ см}\\) и толкнули, сообщив ему скорость \\(v_0 = 1,0 \\text{ м/с}\\). Амплитуда колебаний такого маятника равна:",
+                image: null,
+                options: ["6,0 см", "9,0 см", "10 см", "12 см", "24 см"],
+                correct: 3,
+                solution: "Воспользуемся законом сохранения полной механической энергии для пружинного маятника. В начальный момент времени тело обладало и потенциальной энергией упругой деформации, и кинетической энергией движения:<br>$$ E = \\frac{k x_0^2}{2} + \\frac{m v_0^2}{2} $$<br>В точке максимального отклонения (амплитуде \\(A\\)) скорость тела равна нулю, и вся энергия становится потенциальной:<br>$$ E_{\\text{max}} = \\frac{k A^2}{2} $$<br>Приравняем эти энергии и сократим на 2:<br>$$ k A^2 = k x_0^2 + m v_0^2 \\implies A = \\sqrt{x_0^2 + \\frac{m}{k}v_0^2} $$<br>Переведем начальное смещение в метры: \\(x_0 = 0,1 \\text{ м}\\). Подставим все числа:<br>$$ A = \\sqrt{0,1^2 + \\frac{0,50}{100} \\cdot 1,0^2} = \\sqrt{0,01 + 0,005} = \\sqrt{0,015} \\text{ м} $$<br>Извлечем корень: \\(A \\approx 0,1225 \\text{ м} = 12,25 \\text{ см}\\).<br>С учетом точности данных в условии, правильный округленный ответ — <b>12 см</b>."
+            },
+            {
+                text: "Для того чтобы периоды колебаний одного и того же тела маятника длиной \\(l = 20 \\text{ см}\\) и пружинного маятника с жесткостью пружины \\(k = 30 \\text{ Н/м}\\) были одинаковы, масса колеблющегося тела должна быть равна:",
+                image: null,
+                options: ["0,20 кг", "0,30 кг", "0,45 кг", "0,60 кг", "0,90 кг"],
+                correct: 3,
+                solution: "Запишем формулы периодов для обоих видов маятников.<br>Период математического маятника: \\(T_1 = 2\\pi \\sqrt{\\frac{l}{g}}\\).<br>Период пружинного маятника: \\(T_2 = 2\\pi \\sqrt{\\frac{m}{k}}\\).<br><br>По условию периоды равны (\\(T_1 = T_2\\)). Приравняем их и возведем в квадрат обе части уравнения:<br>$$ \\frac{l}{g} = \\frac{m}{k} $$<br>Выразим массу тела \\(m\\):<br>$$ m = \\frac{k \\cdot l}{g} $$<br>Подставим числа (длину переведем в СИ: \\(l = 0,20 \\text{ м}\\), \\(g = 10 \\text{ м/с}^2\\)):<br>$$ m = \\frac{30 \\cdot 0,20}{10} = 3 \\cdot 0,20 = 0,60 \\text{ кг} $$"
+            },
+            {
+                text: "Разность фаз колебаний точек, координаты которых \\(x_1 = 1,0 \\text{ м}\\), \\(x_2 = 4,0 \\text{ м}\\), в плоской поперечной волне (рис. 1), распространяющейся вдоль оси \\(Ox\\) (источник колебаний находится в точке \\(O\\)), равна:",
+                image: svgWave,
+                options: ["\\(\\frac{\\pi}{2}\\)", "\\(\\pi\\)", "\\(\\frac{3\\pi}{2}\\)", "\\(2\\pi\\)", "\\(\\frac{5\\pi}{2}\\)"],
+                correct: 2,
+                solution: "По графику волны (зависимость смещения частиц от координаты) найдем длину волны \\(\\lambda\\).<br>Длина волны — это расстояние между двумя ближайшими точками, колеблющимися в одинаковой фазе (например, между двумя нулями при движении графика вверх).<br>По графику видно, что волна пересекает ось X вверх при \\(x = 1,0 \\text{ м}\\) и затем снова пересекает её вверх при \\(x = 5,0 \\text{ м}\\).<br>Следовательно, длина волны: \\(\\lambda = 5,0 - 1,0 = 4,0 \\text{ м}\\).<br><br>Расстояние между двумя заданными точками составляет:<br>$$ \\Delta x = x_2 - x_1 = 4,0 - 1,0 = 3,0 \\text{ м} $$<br>Разность фаз \\(\\Delta \\varphi\\) связана с расстоянием формулой:<br>$$ \\Delta \\varphi = \\frac{2\\pi}{\\lambda} \\Delta x $$<br>Подставим найденные значения:<br>$$ \\Delta \\varphi = \\frac{2\\pi}{4,0} \\cdot 3,0 = \\frac{\\pi}{2} \\cdot 3 = \\frac{3\\pi}{2} $$"
+            },
+            {
+                text: "Если емкость конденсатора \\(C = 5,0 \\text{ мкФ}\\), а индуктивность катушки колебательного контура \\(L = 5,0 \\cdot 10^{-6} \\text{ Гн}\\), то период электромагнитных колебаний в контуре составляет:",
+                image: null,
+                options: ["\\(3,1 \\cdot 10^{-6}\\) с", "\\(6,3 \\cdot 10^{-6}\\) с", "\\(3,1 \\cdot 10^{-5}\\) с", "\\(6,3 \\cdot 10^{-5}\\) с", "\\(3,1 \\cdot 10^{-4}\\) с"],
+                correct: 2,
+                solution: "Период собственных электромагнитных колебаний в идеальном колебательном контуре рассчитывается по формуле Томсона:<br>$$ T = 2\\pi \\sqrt{LC} $$<br>Переведем емкость конденсатора в фарады: \\(C = 5,0 \\cdot 10^{-6} \\text{ Ф}\\). Подставим данные:<br>$$ T = 2 \\cdot 3,14 \\cdot \\sqrt{5,0 \\cdot 10^{-6} \\cdot 5,0 \\cdot 10^{-6}} $$<br>$$ T = 6,28 \\cdot \\sqrt{25 \\cdot 10^{-12}} = 6,28 \\cdot 5,0 \\cdot 10^{-6} $$<br>$$ T = 31,4 \\cdot 10^{-6} = 3,14 \\cdot 10^{-5} \\text{ с} $$<br>С учетом округления получаем ответ: <b>\\(3,1 \\cdot 10^{-5}\\) с</b>."
+            },
+            {
+                text: "В колебательном контуре напряжение на обкладках конденсатора и сила тока в катушке индуктивности изменяются по законам \\(U = 3,0\\cos(6,0\\cdot 10^3 t)\\) В и \\(I = 2,0\\sin(6,0\\cdot 10^3 t)\\) А. Индуктивность катушки равна:",
+                image: null,
+                options: ["12 мкГн", "0,12 мГн", "0,25 мГн", "0,42 мГн", "1,1 мГн"],
+                correct: 2,
+                solution: "Из заданных уравнений колебаний мы можем выписать максимальные (амплитудные) значения величин и циклическую частоту:<br>Амплитуда напряжения \\(U_m = 3,0 \\text{ В}\\).<br>Амплитуда тока \\(I_m = 2,0 \\text{ А}\\).<br>Циклическая частота \\(\\omega = 6,0 \\cdot 10^3 \\text{ рад/с}\\).<br><br>Связь между амплитудами тока и напряжения (закон Ома для колебательного контура) выражается через волновое сопротивление:\\(U_m = I_m \\cdot X_L\\), однако надежнее использовать закон сохранения энергии.<br>Максимальная энергия конденсатора равна максимальной энергии катушки:<br>$$ \\frac{C U_m^2}{2} = \\frac{L I_m^2}{2} \\implies C = L \\frac{I_m^2}{U_m^2} $$<br>Также нам известна формула Томсона \\(\\omega = \\frac{1}{\\sqrt{LC}}\\), откуда \\(C = \\frac{1}{\\omega^2 L}\\).<br><br>Приравняем два выражения для емкости \\(C\\):<br>$$ L \\frac{I_m^2}{U_m^2} = \\frac{1}{\\omega^2 L} \\implies L^2 = \\frac{U_m^2}{\\omega^2 I_m^2} \\implies L = \\frac{U_m}{\\omega I_m} $$<br>Подставим числа:<br>$$ L = \\frac{3,0}{6000 \\cdot 2,0} = \\frac{3}{12000} = \\frac{1}{4000} = 0,00025 \\text{ Гн} $$<br>Переведем ответ в миллигенри (мГн): <b>0,25 мГн</b>."
+            },
+            {
+                text: "Максимальная сила тока в идеальном колебательном контуре \\(I_0 = 1,0 \\text{ мА}\\), а максимальный заряд на обкладках конденсатора \\(q_0 = \\frac{10}{\\pi} \\text{ мкКл}\\). Частота электромагнитных колебаний, происходящих в контуре, равна:",
+                image: null,
+                options: ["50 Гц", "0,10 кГц", "0,25 кГц", "0,50 кГц", "1,0 кГц"],
+                correct: 0,
+                solution: "Сила тока — это первая производная от заряда по времени (\\(I = q'\\)).<br>Поскольку заряд изменяется по гармоническому закону \\(q(t) = q_0 \\cos(\\omega t)\\), сила тока равна \\(I(t) = -q_0 \\omega \\sin(\\omega t)\\).<br>Из этого следует связь амплитуды тока и амплитуды заряда:<br>$$ I_0 = q_0 \\omega $$<br>Вспомним, что циклическая частота \\(\\omega\\) связана с обычной частотой \\(\\nu\\) как \\(\\omega = 2\\pi \\nu\\). Подставим это в формулу:<br>$$ I_0 = q_0 \\cdot 2\\pi \\nu $$<br>Выразим искомую частоту \\(\\nu\\):<br>$$ \\nu = \\frac{I_0}{2\\pi q_0} $$<br>Переведем данные в СИ: \\(I_0 = 1,0 \\cdot 10^{-3} \\text{ А}\\), \\(q_0 = \\frac{10}{\\pi} \\cdot 10^{-6} \\text{ Кл}\\).<br>$$ \\nu = \\frac{10^{-3}}{2\\pi \\cdot \\frac{10}{\\pi} \\cdot 10^{-6}} = \\frac{10^{-3}}{20 \\cdot 10^{-6}} = \\frac{1000}{20} = 50 \\text{ Гц} $$"
+            },
+            {
+                text: "Рамка площадью \\(S = 200 \\text{ см}^2\\) вращается в однородном магнитном поле, модуль индукции которого \\(B = 0,10 \\text{ Тл}\\). Число витков в рамке \\(N = 200\\), а частота вращения \\(\\nu = 10 \\text{ с}^{-1}\\). Действующее значение ЭДС индукции, возникающей в рамке, равно:",
+                image: null,
+                options: ["18 В", "24 В", "36 В", "72 В", "94 В"],
+                correct: 0,
+                solution: "При равномерном вращении рамки в ней индуцируется переменная ЭДС по гармоническому закону. Максимальное (амплитудное) значение ЭДС индукции определяется формулой:<br>$$ \\mathcal{E}_m = N B S \\omega $$<br>Циклическая частота вращения \\(\\omega = 2\\pi \\nu\\). Тогда амплитудное значение ЭДС:<br>$$ \\mathcal{E}_m = 2\\pi \\nu N B S $$<br>Переведем площадь в СИ: \\(S = 200 \\text{ см}^2 = 0,02 \\text{ м}^2\\). Вычислим амплитуду:<br>$$ \\mathcal{E}_m = 2 \\cdot 3,14 \\cdot 10 \\cdot 200 \\cdot 0,10 \\cdot 0,02 = 62,8 \\cdot 0,4 = 25,12 \\text{ В} $$<br><br>В задаче требуется найти <b>действующее</b> значение ЭДС. Для синусоидального сигнала оно в \\(\\sqrt{2}\\) раз меньше амплитудного:<br>$$ \\mathcal{E}_d = \\frac{\\mathcal{E}_m}{\\sqrt{2}} = \\frac{25,12}{1,414} \\approx 17,76 \\text{ В} $$<br>Округляя, получаем ответ: <b>18 В</b>."
+            }
+        ];
+
+        const container = document.getElementById('tasks-container');
+
+        tasks.forEach((task, index) => {
+            const taskNumber = index + 1;
+            const card = document.createElement('div');
+            card.className = 'task-card';
+
+            const header = document.createElement('div');
+            header.className = 'task-header';
+            header.textContent = `Задача № ${taskNumber}`;
+            card.appendChild(header);
+
+            const textContent = document.createElement('div');
+            textContent.className = 'task-text';
+            textContent.innerHTML = task.text;
+            card.appendChild(textContent);
+
+            if (task.image) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'image-container';
+                imgContainer.innerHTML = task.image;
+                card.appendChild(imgContainer);
+            }
+
+            const optionsGrid = document.createElement('div');
+            optionsGrid.className = 'options-grid';
+
+            let isAnswered = false;
+            let selectedBtn = null;
+            let buttonElements = [];
+            let inputElement = null;
+
+            if (task.options) {
+                task.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = `<b>${optIndex + 1})</b> ${optText}`;
+                    
+                    btn.addEventListener('click', function() {
+                        if (isAnswered) return;
+                        buttonElements.forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedBtn = { button: this, index: optIndex };
+                    });
+
+                    buttonElements.push(btn);
+                    optionsGrid.appendChild(btn);
+                });
+            } else {
+                inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.className = 'text-input';
+                inputElement.placeholder = 'Введите ваш ответ...';
+                optionsGrid.appendChild(inputElement);
+            }
+
+            card.appendChild(optionsGrid);
+
+            const actionsGroup = document.createElement('div');
+            actionsGroup.className = 'actions-group';
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'action-btn check-btn';
+            checkBtn.textContent = 'Проверить ответ';
+
+            const solutionToggleBtn = document.createElement('button');
+            solutionToggleBtn.className = 'action-btn solution-toggle-btn';
+            solutionToggleBtn.textContent = 'Показать решение';
+
+            const solutionBox = document.createElement('div');
+            solutionBox.className = 'solution-box';
+            solutionBox.innerHTML = `<h4>Разбор решения:</h4>${task.solution}`;
+
+            checkBtn.addEventListener('click', () => {
+                if (isAnswered) return;
+                
+                if (task.options) {
+                    if (!selectedBtn) { alert('Пожалуйста, выберите вариант ответа.'); return; }
+                    isAnswered = true;
+                    buttonElements.forEach(btn => btn.disabled = true);
+                    
+                    if (selectedBtn.index === task.correct) {
+                        selectedBtn.button.classList.add('correct');
+                    } else {
+                        selectedBtn.button.classList.add('wrong');
+                        buttonElements[task.correct].classList.add('correct');
+                    }
+                } else {
+                    let userVal = inputElement.value.trim().replace(',', '.');
+                    if (userVal === '') { alert('Пожалуйста, введите ответ в поле.'); return; }
+                    isAnswered = true;
+                    inputElement.disabled = true;
+
+                    if (task.correct.includes(userVal)) {
+                        inputElement.classList.add('correct');
+                    } else {
+                        inputElement.classList.add('wrong');
+                        let correctText = task.correct[0].replace('.', ',');
+                        solutionBox.innerHTML = `<h4>Разбор решения:</h4><p style="color:var(--wrong-color); font-weight:bold;">Правильный ответ: ${correctText}</p>${task.solution}`;
+                    }
+                }
+
+                checkBtn.style.display = 'none';
+                solutionToggleBtn.style.display = 'block';
+                
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([solutionBox]);
+                }
+            });
+
+            solutionToggleBtn.addEventListener('click', () => {
+                if (solutionBox.classList.contains('visible')) {
+                    solutionBox.classList.remove('visible');
+                    solutionToggleBtn.textContent = 'Показать решение';
+                } else {
+                    solutionBox.classList.add('visible');
+                    solutionToggleBtn.textContent = 'Скрыть решение';
+                }
+            });
+
+            actionsGroup.appendChild(checkBtn);
+            actionsGroup.appendChild(solutionToggleBtn);
+            card.appendChild(actionsGroup);
+            card.appendChild(solutionBox);
+            container.appendChild(card);
+        });
+
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err));
+        }
+    </script>
+</body>
+</html>
