@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Физика ядра</title>
+    
+    <script>
+        window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, chtml: { scale: 1.1 } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb; --primary-hover: #1d4ed8; --bg-color: #f8fafc;
+            --card-bg: #ffffff; --text-main: #0f172a; --correct-color: #10b981; --wrong-color: #ef4444;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-weight: 500; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; line-height: 1.7; font-size: 1.05rem; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 20px; font-weight: 800; }
+
+        .nav-menu { text-align: center; margin-bottom: 30px; }
+        .nav-menu a { text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin: 0 5px; transition: 0.2s; display: inline-block; margin-bottom: 10px; }
+        .nav-menu a.active { background-color: var(--primary-color); color: white; }
+        .nav-menu a:not(.active) { background-color: #cbd5e1; color: var(--text-main); }
+        .nav-menu a:not(.active):hover { background-color: #94a3b8; }
+
+        .task-card { background-color: var(--card-bg); border-radius: 12px; padding: 24px; margin-bottom: 28px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; overflow: hidden; }
+        .task-header { font-weight: 700; font-size: 1.25rem; margin-bottom: 16px; color: var(--primary-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .task-text { margin-bottom: 20px; overflow-wrap: break-word; word-wrap: break-word; }
+
+        .image-container { margin: 20px 0; text-align: center; background-color: #f1f5f9; border: 1px dashed #cbd5e1; padding: 20px; border-radius: 8px; overflow-x: auto; }
+        
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .option-btn { background-color: #f8fafc; border: 2px solid #cbd5e1; color: var(--text-main); padding: 14px 20px; border-radius: 8px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary-color); background-color: #eff6ff; }
+        .option-btn.selected { background-color: #dbeafe; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        .option-btn.correct, .text-input.correct { background-color: var(--correct-color) !important; color: white !important; border-color: var(--correct-color) !important; }
+        .option-btn.wrong, .text-input.wrong { background-color: var(--wrong-color) !important; color: white !important; border-color: var(--wrong-color) !important; }
+
+        .text-input { width: 100%; max-width: 300px; padding: 14px 16px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .text-input:focus { border-color: var(--primary-color); }
+
+        .actions-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .action-btn { padding: 14px 24px; color: white; border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; transition: background-color 0.2s; font-weight: 700; flex: 1; min-width: 180px; text-align: center; }
+        .check-btn { background-color: var(--primary-color); }
+        .check-btn:hover { background-color: var(--primary-hover); }
+        .check-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .solution-toggle-btn { background-color: #f59e0b; display: none; }
+        .solution-toggle-btn:hover { background-color: #d97706; }
+
+        .solution-box { display: none; margin-top: 24px; background-color: #f0fdf4; border: 2px solid #bbf7d0; padding: 24px; border-radius: 8px; color: #166534; overflow-x: auto; overflow-wrap: break-word; word-wrap: break-word; }
+        .solution-box.visible { display: block; animation: fadeIn 0.4s ease-out; }
+        .solution-box h4 { margin-top: 0; color: #15803d; margin-bottom: 16px; font-size: 1.15rem; font-weight: 800; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) { body { padding: 12px; font-size: 1rem; } .task-card { padding: 18px; } .actions-group { flex-direction: column; } .action-btn { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Интенсив</h1>
+        <div class="nav-menu">
+            <a href="index.html">Механика</a>
+            <a href="mkt.html">МКТ и Термодинамика</a>
+            <a href="electro.html">Электричество и Магнетизм</a>
+            <a href="statics.html">Статика и Гидростатика</a>
+            <a href="waves.html">Колебания и Волны</a>
+            <a href="optics.html">Оптика</a>
+            <a href="nuclear.html" class="active">Физика ядра</a>
+        </div>
+        <div id="tasks-container"></div>
+    </div>
+
+    <script>
+        // ИСПРАВЛЕННЫЙ ВЕКТОРНЫЙ РИСУНОК (Стрелки смотрят вверх и вниз)
+        const svgEnergyLevels = `<svg viewBox="0 0 450 280" width="100%" style="max-width:450px; margin: 0 auto; display: block;">
+            <defs>
+                <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/>
+                </marker>
+            </defs>
+
+            <!-- Энергетические уровни -->
+            <line x1="80" y1="40" x2="350" y2="40" stroke="#0f172a" stroke-width="2"/>
+            <text x="70" y="46" font-family="serif" font-size="24" font-style="italic" text-anchor="end">W<tspan baseline-shift="sub" font-size="0.7em">5</tspan></text>
+            
+            <line x1="80" y1="70" x2="350" y2="70" stroke="#0f172a" stroke-width="2"/>
+            <text x="360" y="76" font-family="serif" font-size="24" font-style="italic" text-anchor="start">W<tspan baseline-shift="sub" font-size="0.7em">4</tspan></text>
+            
+            <line x1="80" y1="105" x2="350" y2="105" stroke="#0f172a" stroke-width="2"/>
+            <text x="70" y="111" font-family="serif" font-size="24" font-style="italic" text-anchor="end">W<tspan baseline-shift="sub" font-size="0.7em">3</tspan></text>
+            
+            <line x1="80" y1="150" x2="350" y2="150" stroke="#0f172a" stroke-width="2"/>
+            <text x="360" y="156" font-family="serif" font-size="24" font-style="italic" text-anchor="start">W<tspan baseline-shift="sub" font-size="0.7em">2</tspan></text>
+            
+            <line x1="80" y1="210" x2="350" y2="210" stroke="#0f172a" stroke-width="2"/>
+            <text x="70" y="216" font-family="serif" font-size="24" font-style="italic" text-anchor="end">W<tspan baseline-shift="sub" font-size="0.7em">1</tspan></text>
+
+            <!-- Стрелки переходов -->
+            <!-- 1 (Вниз с W3 до W1) -->
+            <line x1="120" y1="105" x2="120" y2="207" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/> 
+            <text x="120" y="240" font-family="serif" font-size="24" text-anchor="middle">1</text>
+            
+            <!-- 2 (Вверх с W1 до W3) -->
+            <line x1="160" y1="210" x2="160" y2="108" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/> 
+            <text x="160" y="240" font-family="serif" font-size="24" text-anchor="middle">2</text>
+            
+            <!-- 3 (Вниз с W4 до W1) -->
+            <line x1="210" y1="70" x2="210" y2="207" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/> 
+            <text x="210" y="240" font-family="serif" font-size="24" text-anchor="middle">3</text>
+            
+            <!-- 4 (Вниз строго с W2 до W1) -->
+            <line x1="260" y1="150" x2="260" y2="207" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/> 
+            <text x="260" y="240" font-family="serif" font-size="24" text-anchor="middle">4</text>
+            
+            <!-- 5 (Вниз с W5 до W4) -->
+            <line x1="310" y1="40" x2="310" y2="67" stroke="#0f172a" stroke-width="2.5" marker-end="url(#arr)"/> 
+            <text x="310" y="95" font-family="serif" font-size="24" text-anchor="middle">5</text>
+
+            <text x="215" y="275" font-family="sans-serif" font-size="16" font-style="italic" text-anchor="middle">Рис. 1</text>
+        </svg>`;
+
+        // БАЗА ДАННЫХ
+        const tasks = [
+            {
+                text: "Если работа выхода электронов для цинка \\(A = 3,74 \\text{ эВ}\\), то длина \\(\\lambda\\) красной границы фотоэффекта:",
+                image: null,
+                options: ["530 нм", "430 нм", "330 нм", "230 нм", "130 нм"],
+                correct: 2,
+                solution: "Формула красной границы фотоэффекта определяет максимальную длину волны, при которой еще возможно вырывание электронов из металла (кинетическая энергия равна нулю):<br>$$ \\lambda_{max} = \\frac{hc}{A} $$<br>В физике микромира удобно использовать значение произведения постоянной Планка на скорость света, выраженное в электрон-вольтах на нанометр: \\(hc \\approx 1240 \\text{ эВ} \\cdot \\text{нм}\\).<br>Тогда расчет сводится к простому делению:<br>$$ \\lambda_{max} = \\frac{1240 \\text{ эВ} \\cdot \\text{нм}}{3,74 \\text{ эВ}} \\approx 331,5 \\text{ нм} $$<br><i>Примечание: Если считать через СИ, \\(A = 3,74 \\cdot 1,6 \\cdot 10^{-19} \\approx 5,984 \\cdot 10^{-19} \\text{ Дж}\\), \\(\\lambda = \\frac{6,63 \\cdot 10^{-34} \\cdot 3 \\cdot 10^8}{5,984 \\cdot 10^{-19}} \\approx 3,32 \\cdot 10^{-7} \\text{ м} = 332 \\text{ нм}\\).</i><br><br>Наиболее близкий ответ из предложенных: <b>330 нм</b>."
+            },
+            {
+                text: "Фотоэлектроны, выбиваемые светом с поверхности цезия, полностью задерживаются напряжением \\(U = 0,750 \\text{ В}\\). Если работа выхода электронов из цезия составляет \\(A = 3,20 \\cdot 10^{-19} \\text{ Дж}\\), то длина волны падающего на катод света равна:",
+                image: null,
+                options: ["320 нм", "450 нм", "580 нм", "640 нм", "820 нм"],
+                correct: 1,
+                solution: "Запишем уравнение Эйнштейна для фотоэффекта:<br>$$ E_{\\text{фот}} = A + E_{k,\\text{max}} $$<br>Максимальная кинетическая энергия вылетающих электронов равна работе задерживающего электрического поля: \\(E_{k,\\text{max}} = e U\\).<br>Вычислим кинетическую энергию (заряд электрона \\(e = 1,6 \\cdot 10^{-19} \\text{ Кл}\\)):<br>$$ E_{k,\\text{max}} = 1,6 \\cdot 10^{-19} \\text{ Кл} \\cdot 0,750 \\text{ В} = 1,2 \\cdot 10^{-19} \\text{ Дж} $$<br>Теперь найдем энергию падающего фотона:<br>$$ E_{\\text{фот}} = 3,2 \\cdot 10^{-19} \\text{ Дж} + 1,2 \\cdot 10^{-19} \\text{ Дж} = 4,4 \\cdot 10^{-19} \\text{ Дж} $$<br>Энергия фотона связана с длиной волны соотношением \\(E_{\\text{фот}} = \\frac{hc}{\\lambda}\\). Выразим \\(\\lambda\\):<br>$$ \\lambda = \\frac{hc}{E_{\\text{фот}}} = \\frac{6,63 \\cdot 10^{-34} \\cdot 3 \\cdot 10^8}{4,4 \\cdot 10^{-19}} = \\frac{19,89 \\cdot 10^{-26}}{4,4 \\cdot 10^{-19}} \\approx 4,52 \\cdot 10^{-7} \\text{ м} $$<br>Переведем в нанометры: \\(4,52 \\cdot 10^{-7} \\text{ м} = 452 \\text{ нм}\\). Ближайший вариант: <b>450 нм</b>."
+            },
+            {
+                text: "Полная энергия электрона в атоме водорода на \\(n\\)-й орбите \\(W_n = -\\frac{13,6}{n^2} \\text{ эВ}\\). Наименьшая энергия, которую нужно сообщить электрону, находящемуся на третьей орбите в атоме водорода, чтобы ионизировать атом, составляет:",
+                image: null,
+                options: ["13,6 эВ", "3,40 эВ", "1,51 эВ", "0,560 эВ", "0,111 эВ"],
+                correct: 2,
+                solution: "Ионизация атома означает, что электрон отрывается от ядра и уходит на бесконечно большое расстояние (покидает атом).<br>На бесконечном удалении (орбита \\(n = \\infty\\)) потенциальная энергия взаимодействия электрона с ядром равна нулю, следовательно, энергия электрона \\(W_\\infty = 0 \\text{ эВ}\\).<br><br>Энергия электрона на третьей орбите (\\(n = 3\\)) равна:<br>$$ W_3 = -\\frac{13,6}{3^2} = -\\frac{13,6}{9} \\approx -1,511 \\text{ эВ} $$<br>Энергия, которую необходимо сообщить электрону, равна разности конечной и начальной энергии:<br>$$ \\Delta W = W_\\infty - W_3 = 0 - (-1,511) = +1,511 \\text{ эВ} $$<br>Округляем до трех значащих цифр и получаем: <b>1,51 эВ</b>."
+            },
+            {
+                text: "На представленной диаграмме энергетических уровней атома (рис. 1) переход, связанный с излучением фотона наименьшей частоты, изображен стрелкой:",
+                image: svgEnergyLevels,
+                options: ["1", "2", "3", "4", "5"],
+                correct: 4,
+                solution: "При переходах электрона между энергетическими уровнями происходят следующие процессы:<br>• Если стрелка направлена <b>вверх</b> (на более высокий энергетический уровень), атом <b>поглощает</b> фотон.<br>• Если стрелка направлена <b>вниз</b> (на более низкий энергетический уровень), атом <b>излучает</b> фотон.<br><br>Поскольку нас просят найти переход, связанный с <i>излучением</i>, стрелка №2 отпадает сразу (это поглощение). Остаются стрелки 1, 3, 4 и 5.<br><br>Постулат Бора гласит, что энергия излученного фотона равна разности энергий уровней: \\(h\\nu = \\Delta W\\). Отсюда частота \\(\\nu = \\frac{\\Delta W}{h}\\).<br>Следовательно, <b>наименьшей частоте</b> соответствует <b>наименьшая энергия фотона</b>, а значит, и <b>наименьшее расстояние между уровнями</b> на диаграмме.<br><br>По графику видно, что самая короткая стрелка, направленная вниз, — это стрелка <b>№5</b> (переход с \\(W_5\\) на \\(W_4\\)). Это и есть излучение фотона наименьшей частоты."
+            },
+            {
+                text: "При радиоактивном распаде ядро урана \\(_{92}^{238}\\text{U}\\) превращается в ядро свинца \\(_{82}^{198}\\text{Pb}\\). При этом происходит \\(N_\\alpha\\) и \\(N_\\beta\\) \\(\\alpha\\)- и \\(\\beta\\)-распадов, равное:",
+                image: null,
+                options: ["10 и 8", "8 и 10", "9 и 10", "10 и 9", "10 и 10"],
+                correct: 4,
+                solution: "При каждом альфа-распаде (испускании ядра гелия \\(_2^4\\text{He}\\)) массовое число ядра уменьшается на 4, а зарядовое — на 2.<br>При каждом бета-распаде (испускании электрона \\(_{-1}^0\\text{e}\\)) массовое число не меняется, а зарядовое увеличивается на 1.<br><br>1. Найдем изменение массового числа (верхний индекс):<br>$$ \\Delta A = 238 - 198 = 40 $$<br>Поскольку массовое число меняется <b>только</b> при альфа-распаде, мы можем точно найти их количество:<br>$$ N_\\alpha = \\frac{40}{4} = 10 $$<br>2. Найдем изменение зарядового числа (нижний индекс):<br>Начальный заряд был 92. После 10 альфа-распадов заряд должен был стать: \\(92 - 10 \\cdot 2 = 72\\).<br>Однако конечный заряд ядра свинца равен 82. Значит, бета-распады увеличили заряд от 72 до 82.<br>$$ N_\\beta = 82 - 72 = 10 $$<br>Таким образом, происходит 10 альфа-распадов и 10 бета-распадов. Правильный ответ: <b>10 и 10</b>."
+            },
+            {
+                text: "Период полураспада радиоактивного элемента \\(T = 1,0\\) года. Через промежуток времени \\(t = 5,0\\) лет останется нераспавшихся ядер:",
+                image: null,
+                options: ["25 %", "13 %", "6,3 %", "3,1 %", "1,6 %"],
+                correct: 3,
+                solution: "Закон радиоактивного распада позволяет найти долю ядер, оставшихся нераспавшимися через время \\(t\\):<br>$$ N = N_0 \\cdot 2^{-\\frac{t}{T}} $$<br>Доля нераспавшихся ядер выражается как отношение \\(\\frac{N}{N_0}\\):<br>$$ \\frac{N}{N_0} = 2^{-\\frac{5,0}{1,0}} = 2^{-5} = \\frac{1}{2^5} = \\frac{1}{32} $$<br>Переведем полученную дробь в десятичное число и затем в проценты:<br>$$ \\frac{1}{32} = 0,03125 $$<br>$$ 0,03125 \\cdot 100\\% = 3,125\\% $$<br>С учетом точности округления предложенных вариантов ответа, выбираем <b>3,1 %</b>."
+            },
+            {
+                text: "Электрическая мощность \\(P\\) атомной электростанции, имеющей КПД \\(\\eta = 25\\%\\), если станция расходует в сутки уран-235 массой \\(m = 235 \\text{ г}\\), а при делении одного ядра урана выделяется энергия в количестве \\(W_0 = 3,2 \\cdot 10^{-11} \\text{ Дж}\\), составляет:",
+                image: null,
+                options: ["24 МВт", "43 МВт", "56 МВт", "69 МВт", "84 МВт"],
+                correct: 2,
+                solution: "1. Вычислим полное количество распавшихся ядер урана. Один моль любого вещества содержит число Авогадро ядер (\\(N_A \\approx 6,02 \\cdot 10^{23} \\text{ моль}^{-1}\\)). Молярная масса урана-235 равна \\(M = 235 \\text{ г/моль}\\).<br>Так как станция расходует ровно 235 г, то это ровно 1 моль урана. Значит, количество ядер:<br>$$ N = 1 \\text{ моль} \\cdot 6,02 \\cdot 10^{23} \\text{ моль}^{-1} = 6,02 \\cdot 10^{23} \\text{ шт.} $$<br>2. Общая энергия, выделяющаяся при делении всех ядер:<br>$$ Q = N \\cdot W_0 = 6,02 \\cdot 10^{23} \\cdot 3,2 \\cdot 10^{-11} = 19,264 \\cdot 10^{12} \\text{ Дж} $$<br>3. Полезная (электрическая) энергия с учетом КПД станции:<br>$$ E_{\\text{пол}} = \\eta \\cdot Q = 0,25 \\cdot 19,264 \\cdot 10^{12} = 4,816 \\cdot 10^{12} \\text{ Дж} $$<br>4. Электрическая мощность — это полезная энергия, выработанная за единицу времени. Время равно одним суткам (\\(t = 24 \\cdot 3600 = 86\\,400 \\text{ с}\\)):<br>$$ P = \\frac{E_{\\text{пол}}}{t} = \\frac{4,816 \\cdot 10^{12}}{86\\,400} \\approx 55\\,740\\,000 \\text{ Вт} \\approx 55,7 \\text{ МВт} $$<br>Ближайший вариант: <b>56 МВт</b>."
+            },
+            {
+                text: "Ядро урана \\(_{92}^{235}\\text{U}\\), поглощая нейтрон, испытывает деление на два более легких ядра (осколка) с испусканием двух нейтронов. Если одним из осколков является ядро цезия \\(_{55}^{140}\\text{Cs}\\), то другой осколок представляет собой ядро:",
+                image: null,
+                options: ["\\(_{40}^{94}\\text{Zr}\\)", "\\(_{56}^{140}\\text{Ba}\\)", "\\(_{37}^{94}\\text{Rb}\\)", "\\(_{38}^{85}\\text{Sr}\\)", "\\(_{6}^{12}\\text{C}\\)"],
+                correct: 2,
+                solution: "Запишем уравнение ядерной реакции. Обозначим неизвестный осколок как \\(_{Z}^{A}\\text{X}\\). Нейтрон обозначается как \\(_0^1\\text{n}\\).<br>$$ _{92}^{235}\\text{U} + _0^1\\text{n} \\rightarrow _{55}^{140}\\text{Cs} + _{Z}^{A}\\text{X} + 2 \cdot _0^1\\text{n} $$<br>В любых ядерных реакциях строго выполняются законы сохранения массового числа (сумма верхних индексов) и зарядового числа (сумма нижних индексов).<br><br>1. <b>Закон сохранения массового числа (A):</b><br>$$ 235 + 1 = 140 + A + 2 \\cdot 1 $$<br>$$ 236 = 142 + A \\implies A = 236 - 142 = 94 $$<br>2. <b>Закон сохранения зарядового числа (Z):</b><br>$$ 92 + 0 = 55 + Z + 2 \\cdot 0 $$<br>$$ 92 = 55 + Z \\implies Z = 92 - 55 = 37 $$<br><br>Таким образом, неизвестное ядро имеет зарядовое число 37 (это химический элемент рубидий, Rb) и массовое число 94. Правильный ответ — <b>\\(_{37}^{94}\\text{Rb}\\)</b>."
+            }
+        ];
+
+        const container = document.getElementById('tasks-container');
+
+        tasks.forEach((task, index) => {
+            const taskNumber = index + 1;
+            const card = document.createElement('div');
+            card.className = 'task-card';
+
+            const header = document.createElement('div');
+            header.className = 'task-header';
+            header.textContent = `Задача № ${taskNumber}`;
+            card.appendChild(header);
+
+            const textContent = document.createElement('div');
+            textContent.className = 'task-text';
+            textContent.innerHTML = task.text;
+            card.appendChild(textContent);
+
+            if (task.image) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'image-container';
+                imgContainer.innerHTML = task.image;
+                card.appendChild(imgContainer);
+            }
+
+            const optionsGrid = document.createElement('div');
+            optionsGrid.className = 'options-grid';
+
+            let isAnswered = false;
+            let selectedBtn = null;
+            let buttonElements = [];
+            let inputElement = null;
+
+            if (task.options) {
+                task.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = `<b>${optIndex + 1})</b> ${optText}`;
+                    
+                    btn.addEventListener('click', function() {
+                        if (isAnswered) return;
+                        buttonElements.forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedBtn = { button: this, index: optIndex };
+                    });
+
+                    buttonElements.push(btn);
+                    optionsGrid.appendChild(btn);
+                });
+            } else {
+                inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.className = 'text-input';
+                inputElement.placeholder = 'Введите ваш ответ...';
+                optionsGrid.appendChild(inputElement);
+            }
+
+            card.appendChild(optionsGrid);
+
+            const actionsGroup = document.createElement('div');
+            actionsGroup.className = 'actions-group';
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'action-btn check-btn';
+            checkBtn.textContent = 'Проверить ответ';
+
+            const solutionToggleBtn = document.createElement('button');
+            solutionToggleBtn.className = 'action-btn solution-toggle-btn';
+            solutionToggleBtn.textContent = 'Показать решение';
+
+            const solutionBox = document.createElement('div');
+            solutionBox.className = 'solution-box';
+            solutionBox.innerHTML = `<h4>Разбор решения:</h4>${task.solution}`;
+
+            checkBtn.addEventListener('click', () => {
+                if (isAnswered) return;
+                
+                if (task.options) {
+                    if (!selectedBtn) { alert('Пожалуйста, выберите вариант ответа.'); return; }
+                    isAnswered = true;
+                    buttonElements.forEach(btn => btn.disabled = true);
+                    
+                    if (selectedBtn.index === task.correct) {
+                        selectedBtn.button.classList.add('correct');
+                    } else {
+                        selectedBtn.button.classList.add('wrong');
+                        buttonElements[task.correct].classList.add('correct');
+                    }
+                } else {
+                    let userVal = inputElement.value.trim().replace(',', '.');
+                    if (userVal === '') { alert('Пожалуйста, введите ответ в поле.'); return; }
+                    isAnswered = true;
+                    inputElement.disabled = true;
+
+                    if (task.correct.includes(userVal)) {
+                        inputElement.classList.add('correct');
+                    } else {
+                        inputElement.classList.add('wrong');
+                        let correctText = task.correct[0].replace('.', ',');
+                        solutionBox.innerHTML = `<h4>Разбор решения:</h4><p style="color:var(--wrong-color); font-weight:bold;">Правильный ответ: ${correctText}</p>${task.solution}`;
+                    }
+                }
+
+                checkBtn.style.display = 'none';
+                solutionToggleBtn.style.display = 'block';
+                
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([solutionBox]);
+                }
+            });
+
+            solutionToggleBtn.addEventListener('click', () => {
+                if (solutionBox.classList.contains('visible')) {
+                    solutionBox.classList.remove('visible');
+                    solutionToggleBtn.textContent = 'Показать решение';
+                } else {
+                    solutionBox.classList.add('visible');
+                    solutionToggleBtn.textContent = 'Скрыть решение';
+                }
+            });
+
+            actionsGroup.appendChild(checkBtn);
+            actionsGroup.appendChild(solutionToggleBtn);
+            card.appendChild(actionsGroup);
+            card.appendChild(solutionBox);
+            container.appendChild(card);
+        });
+
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err));
+        }
+    </script>
+</body>
+</html>

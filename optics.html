@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оптика</title>
+    
+    <script>
+        window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, chtml: { scale: 1.1 } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb; --primary-hover: #1d4ed8; --bg-color: #f8fafc;
+            --card-bg: #ffffff; --text-main: #0f172a; --correct-color: #10b981; --wrong-color: #ef4444;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-weight: 500; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; line-height: 1.7; font-size: 1.05rem; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 20px; font-weight: 800; }
+
+        .nav-menu { text-align: center; margin-bottom: 30px; }
+        .nav-menu a { text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin: 0 5px; transition: 0.2s; display: inline-block; margin-bottom: 10px; }
+        .nav-menu a.active { background-color: var(--primary-color); color: white; }
+        .nav-menu a:not(.active) { background-color: #cbd5e1; color: var(--text-main); }
+        .nav-menu a:not(.active):hover { background-color: #94a3b8; }
+
+        .task-card { background-color: var(--card-bg); border-radius: 12px; padding: 24px; margin-bottom: 28px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; overflow: hidden; }
+        .task-header { font-weight: 700; font-size: 1.25rem; margin-bottom: 16px; color: var(--primary-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .task-text { margin-bottom: 20px; overflow-wrap: break-word; word-wrap: break-word; }
+
+        .image-container { margin: 20px 0; text-align: center; background-color: #f1f5f9; border: 1px dashed #cbd5e1; padding: 20px; border-radius: 8px; overflow-x: auto; }
+        
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        
+        .option-btn { background-color: #f8fafc; border: 2px solid #cbd5e1; color: var(--text-main); padding: 14px 20px; border-radius: 8px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+        .option-btn:hover:not(:disabled) { border-color: var(--primary-color); background-color: #eff6ff; }
+        .option-btn.selected { background-color: #dbeafe; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        .option-btn.correct, .text-input.correct { background-color: var(--correct-color) !important; color: white !important; border-color: var(--correct-color) !important; }
+        .option-btn.wrong, .text-input.wrong { background-color: var(--wrong-color) !important; color: white !important; border-color: var(--wrong-color) !important; }
+
+        .text-input { width: 100%; max-width: 300px; padding: 14px 16px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 1.1rem; font-weight: 600; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .text-input:focus { border-color: var(--primary-color); }
+
+        .actions-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .action-btn { padding: 14px 24px; color: white; border: none; border-radius: 8px; font-size: 1.05rem; cursor: pointer; transition: background-color 0.2s; font-weight: 700; flex: 1; min-width: 180px; text-align: center; }
+        .check-btn { background-color: var(--primary-color); }
+        .check-btn:hover { background-color: var(--primary-hover); }
+        .check-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .solution-toggle-btn { background-color: #f59e0b; display: none; }
+        .solution-toggle-btn:hover { background-color: #d97706; }
+
+        .solution-box { display: none; margin-top: 24px; background-color: #f0fdf4; border: 2px solid #bbf7d0; padding: 24px; border-radius: 8px; color: #166534; overflow-x: auto; overflow-wrap: break-word; word-wrap: break-word; }
+        .solution-box.visible { display: block; animation: fadeIn 0.4s ease-out; }
+        .solution-box h4 { margin-top: 0; color: #15803d; margin-bottom: 16px; font-size: 1.15rem; font-weight: 800; }
+        .svg-solution { display: block; margin: 20px auto; background: white; padding: 10px; border-radius: 8px; border: 1px solid #bbf7d0; max-width: 400px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) { body { padding: 12px; font-size: 1rem; } .task-card { padding: 18px; } .actions-group { flex-direction: column; } .action-btn { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Интенсив</h1>
+        <div class="nav-menu">
+            <a href="index.html">Механика</a>
+            <a href="mkt.html">МКТ и Термодинамика</a>
+            <a href="electro.html">Электричество и Магнетизм</a>
+            <a href="statics.html">Статика и Гидростатика</a>
+            <a href="waves.html">Колебания и Волны</a>
+            <a href="optics.html" class="active">Оптика</a>
+        </div>
+        <div id="tasks-container"></div>
+    </div>
+
+    <script>
+        // Векторный рисунок преломления (Тень от сваи)
+        const solSvgShadow = `<svg class="svg-solution" viewBox="0 0 350 250" width="100%">
+            <defs><marker id="arrSol" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M 0 0 L 6 3 L 0 6 z" fill="#0f172a"/></marker></defs>
+            
+            <!-- Вода и дно -->
+            <rect x="20" y="100" width="310" height="120" fill="#e0f2fe"/>
+            <line x1="20" y1="100" x2="330" y2="100" stroke="#0284c7" stroke-width="2"/>
+            <line x1="20" y1="220" x2="330" y2="220" stroke="#0f172a" stroke-width="3"/>
+            <text x="30" y="115" fill="#0284c7" font-size="12" font-weight="bold">ВОДА</text>
+            <text x="30" y="240" font-size="12" font-weight="bold">ДНО</text>
+
+            <!-- Свая -->
+            <rect x="80" y="60" width="10" height="160" fill="#94a3b8" stroke="#0f172a" stroke-width="2"/>
+            
+            <!-- Выноски размеров сваи -->
+            <line x1="70" y1="60" x2="70" y2="100" stroke="#0f172a" stroke-width="1.5"/>
+            <text x="55" y="85" font-family="serif" font-style="italic">h</text>
+            <line x1="70" y1="100" x2="70" y2="220" stroke="#0f172a" stroke-width="1.5"/>
+            <text x="45" y="165" font-family="serif" font-style="italic">H–h</text>
+
+            <!-- Луч света -->
+            <line x1="45" y1="25" x2="85" y2="65" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrSol)"/>
+            <line x1="85" y1="65" x2="120" y2="100" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrSol)"/>
+            <line x1="120" y1="100" x2="195" y2="220" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrSol)"/>
+            
+            <!-- Нормаль -->
+            <line x1="120" y1="70" x2="120" y2="130" stroke="#0f172a" stroke-dasharray="4,4" stroke-width="1.5"/>
+            
+            <!-- Углы -->
+            <path d="M 120 80 A 20 20 0 0 0 100 80" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+            <text x="105" y="75" font-family="serif" font-style="italic">α</text>
+            <path d="M 120 125 A 25 25 0 0 0 133 120" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+            <text x="125" y="140" font-family="serif" font-style="italic">r</text>
+
+            <!-- Длина тени -->
+            <line x1="90" y1="230" x2="195" y2="230" stroke="#0f172a" stroke-width="1.5"/>
+            <line x1="90" y1="225" x2="90" y2="235" stroke="#0f172a" stroke-width="1.5"/>
+            <line x1="195" y1="225" x2="195" y2="235" stroke="#0f172a" stroke-width="1.5"/>
+            <text x="135" y="245" font-weight="bold">Тень (L)</text>
+        </svg>`;
+
+        const tasks = [
+            {
+                text: "В воздухе интерферируют когерентные световые волны с частотой \\(\\nu = 5 \\cdot 10^{14} \\text{ Гц}\\). Если разность хода двух световых волн, пришедших в некоторую точку, \\(\\Delta x = 2,4 \\text{ мкм}\\), то в этой точке будет наблюдаться:",
+                image: null,
+                options: [
+                    "ослабление света, так как разность хода равна четному числу полуволн;",
+                    "ослабление света, так как разность хода равна нечетному числу полуволн;",
+                    "усиление света, так как разность хода равна нечетному числу полуволн;",
+                    "усиление света, так как разность хода равна четному числу полуволн;",
+                    "при данных численных значениях интерференция наблюдаться не будет."
+                ],
+                correct: 3,
+                solution: "Сначала найдем длину волны падающего света в вакууме (воздухе):<br>$$ \\lambda = \\frac{c}{\\nu} $$<br>где \\(c = 3 \\cdot 10^8 \\text{ м/с}\\) — скорость света.<br>$$ \\lambda = \\frac{3 \\cdot 10^8}{5 \\cdot 10^{14}} = 0,6 \\cdot 10^{-6} \\text{ м} = 0,6 \\text{ мкм} $$<br>Условие максимума и минимума интерференции определяется отношением разности хода \\(\\Delta x\\) к половине длины волны (полуволне \\(\\lambda/2 = 0,3 \\text{ мкм}\\)):<br>$$ \\frac{\\Delta x}{\\lambda/2} = \\frac{2,4}{0,3} = 8 $$<br>Разность хода равна <b>8</b> полуволнам. Число 8 — четное.<br><br>Поскольку разность хода содержит <b>четное</b> число полуволн (или целое число полных длин волн: \\(\\Delta x = 4\\lambda\\)), в данной точке волны встречаются в одинаковой фазе и усиливают друг друга (наблюдается интерференционный максимум).<br><br>Правильный ответ: <b>усиление света, так как разность хода равна четному числу полуволн</b>."
+            },
+            {
+                text: "На дифракционную решетку, имеющую штрихи в количестве \\(N = 200\\) на \\(l = 1,00 \\text{ мм}\\), падает нормально свет с длиной волны \\(\\lambda = 500 \\text{ нм}\\). Расстояние от решетки до экрана \\(L = 1,0 \\text{ м}\\). Расстояние от центрального до первого максимума равно:",
+                image: null,
+                options: ["2,0 см", "4,5 см", "6,0 см", "8,2 см", "10 см"],
+                correct: 4,
+                solution: "Найдем период (постоянную) дифракционной решетки \\(d\\):<br>$$ d = \\frac{l}{N} = \\frac{1 \\cdot 10^{-3} \\text{ м}}{200} = 5 \\cdot 10^{-6} \\text{ м} = 5 \\text{ мкм} $$<br>Условие главных максимумов дифракционной решетки:<br>$$ d \\sin \\varphi = k \\lambda $$<br>Для первого максимума порядок \\(k = 1\\). Длина волны \\(\\lambda = 500 \\text{ нм} = 0,5 \\text{ мкм}\\). Вычислим синус угла отклонения:<br>$$ \\sin \\varphi = \\frac{\\lambda}{d} = \\frac{0,5 \\text{ мкм}}{5 \\text{ мкм}} = 0,1 $$<br>Так как синус угла мал (\\(\\sin \\varphi < 0,15\\)), мы можем использовать приближение малых углов: \\(\\sin \\varphi \\approx \\operatorname{tg} \\varphi\\).<br>Расстояние \\(x\\) от центрального максимума до первого максимума на экране связано с расстоянием до экрана \\(L\\) через тангенс угла:<br>$$ x = L \\cdot \\operatorname{tg} \\varphi \\approx L \\cdot \\sin \\varphi $$<br>Подставляем значения:<br>$$ x \\approx 1,0 \\text{ м} \\cdot 0,1 = 0,1 \\text{ м} = 10 \\text{ см} $$"
+            },
+            {
+                text: "В дно озера вбита свая высотой \\(H = 4,0 \\text{ м}\\), выступающая из воды на высоту \\(h = 1,0 \\text{ м}\\). Лучи Солнца падают на поверхность воды под углом \\(\\alpha = 45^\\circ\\). Показатель преломления воды \\(n = \\frac{4}{3}\\). Длина тени сваи на дне озера равна:",
+                image: null,
+                options: ["1,6 м", "1,9 м", "2,4 м", "2,9 м", "3,6 м"],
+                correct: 3,
+                solution: "Длина тени на дне складывается из двух отрезков: горизонтального смещения луча в воздухе (над водой) и горизонтального смещения луча в воде.<br>" + solSvgShadow + "<br>1. <b>Над водой:</b> Крайний луч проходит над верхушкой сваи и падает на воду. Свая выступает на \\(h = 1,0 \\text{ м}\\). Угол падения луча (угол между лучом и вертикальной сваей/нормалью) \\(\\alpha = 45^\\circ\\).<br>Смещение по горизонтали над водой: \\(x_1 = h \\cdot \\operatorname{tg} \\alpha = 1,0 \\cdot \\operatorname{tg} 45^\\circ = 1,0 \\cdot 1 = 1,0 \\text{ м}\\).<br><br>2. <b>В воде:</b> Луч преломляется. По закону Снеллиуса: \\(\\sin \\alpha / \\sin r = n\\).<br>$$ \\sin r = \\frac{\\sin 45^\\circ}{n} = \\frac{\\sqrt{2}/2}{4/3} = \\frac{3\\sqrt{2}}{8} \\approx \\frac{3 \\cdot 1,414}{8} \\approx 0,5303 $$<br>Зная синус, найдем косинус и тангенс угла преломления \\(r\\):<br>$$ \\cos r = \\sqrt{1 - \\sin^2 r} = \\sqrt{1 - \\left(\\frac{18}{64}\\right)} = \\sqrt{\\frac{46}{64}} \\approx \\frac{6,78}{8} \\approx 0,8478 $$<br>$$ \\operatorname{tg} r = \\frac{\\sin r}{\\cos r} \\approx \\frac{0,5303}{0,8478} \\approx 0,625 $$<br>Глубина погруженной части сваи: \\(H_{\\text{воды}} = H - h = 4,0 - 1,0 = 3,0 \\text{ м}\\).<br>Смещение по горизонтали в воде: \\(x_2 = H_{\\text{воды}} \\cdot \\operatorname{tg} r = 3,0 \\cdot 0,625 = 1,875 \\text{ м}\\).<br><br>3. <b>Общая длина тени</b> на дне:<br>$$ L = x_1 + x_2 = 1,0 + 1,875 = 2,875 \\text{ м} $$<br>С учетом округления получаем <b>2,9 м</b>."
+            },
+            {
+                text: "На дне озера лежит камень. Истинная глубина \\(h\\) реки, если человеку, смотрящему перпендикулярно ее поверхности, она кажется равной 3 м, составляет (показатель преломления воды \\(n = \\frac{4}{3}\\)):",
+                image: null,
+                options: ["2 м", "4 м", "5 м", "6 м", "7 м"],
+                correct: 1,
+                solution: "При наблюдении предметов, находящихся в оптически более плотной среде (в воде), по нормали к поверхности (сверху вниз), глубина кажется меньше истинной из-за преломления света на границе вода-воздух.<br><br>Кажущаяся глубина \\(h_{\\text{каж}}\\) связана с истинной глубиной \\(h_{\\text{ист}}\\) и показателем преломления среды \\(n\\) простым соотношением:<br>$$ h_{\\text{каж}} = \\frac{h_{\\text{ист}}}{n} $$<br>Отсюда выражаем истинную глубину:<br>$$ h_{\\text{ист}} = h_{\\text{каж}} \\cdot n $$<br>Подставляем заданные значения:<br>$$ h_{\\text{ист}} = 3 \\cdot \\frac{4}{3} = 4 \\text{ м} $$"
+            },
+            {
+                text: "Если изображение предмета, помещенного на расстоянии \\(d = 15 \\text{ см}\\) от собирающей линзы, получается на расстоянии \\(f = 30 \\text{ см}\\) от нее, то увеличение линзы равно:",
+                image: null,
+                options: ["20", "4,5", "2,0", "0,45", "0,20"],
+                correct: 2,
+                solution: "Линейное увеличение тонкой линзы \\(\\Gamma\\) (показывающее, во сколько раз размер изображения больше размера самого предмета) определяется как отношение расстояния от линзы до изображения \\(f\\) к расстоянию от линзы до предмета \\(d\\):<br>$$ \\Gamma = \\frac{|f|}{d} $$<br>Подставляем заданные значения:<br>$$ \\Gamma = \\frac{30 \\text{ см}}{15 \\text{ см}} = 2,0 $$<br>Изображение увеличено ровно в 2 раза."
+            },
+            {
+                text: "Известно, что изображение предмета, помещенного перед линзой на расстоянии \\(d = 0,5 \\text{ м}\\), мнимое и уменьшенное в \\(k = 3\\) раза. Оптическая сила линзы равна:",
+                image: null,
+                options: ["-4 дптр", "-2 дптр", "2 дптр", "4 дптр", "8 дптр"],
+                correct: 0,
+                solution: "Поскольку изображение является <b>мнимым и уменьшенным</b> для действительного предмета, перед нами однозначно <b>рассеивающая линза</b> (её фокус и оптическая сила будут отрицательными).<br><br>Увеличение линзы равно \\(\\Gamma = \\frac{1}{k} = \\frac{1}{3}\\).<br>С другой стороны, увеличение равно модулю отношения расстояний: \\(\\Gamma = \\frac{|f|}{d}\\).<br>Отсюда найдем расстояние до изображения:<br>$$ |f| = \\Gamma \\cdot d = \\frac{1}{3} \\cdot 0,5 = \\frac{1}{6} \\text{ м} $$<br>Так как изображение мнимое, координата изображения в формуле тонкой линзы берется со знаком минус: \\(f = -\\frac{1}{6} \\text{ м}\\).<br><br>Оптическая сила линзы \\(D\\) определяется по формуле тонкой линзы:<br>$$ D = \\frac{1}{d} + \\frac{1}{f} $$<br>Подставляем значения со своими знаками:<br>$$ D = \\frac{1}{0,5} + \\frac{1}{-\\frac{1}{6}} = 2 - 6 = -4 \\text{ дптр} $$"
+            }
+        ];
+
+        const container = document.getElementById('tasks-container');
+
+        tasks.forEach((task, index) => {
+            const taskNumber = index + 1;
+            const card = document.createElement('div');
+            card.className = 'task-card';
+
+            const header = document.createElement('div');
+            header.className = 'task-header';
+            header.textContent = `Задача № ${taskNumber}`;
+            card.appendChild(header);
+
+            const textContent = document.createElement('div');
+            textContent.className = 'task-text';
+            textContent.innerHTML = task.text;
+            card.appendChild(textContent);
+
+            if (task.image) {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'image-container';
+                imgContainer.innerHTML = task.image;
+                card.appendChild(imgContainer);
+            }
+
+            const optionsGrid = document.createElement('div');
+            optionsGrid.className = 'options-grid';
+
+            let isAnswered = false;
+            let selectedBtn = null;
+            let buttonElements = [];
+            let inputElement = null;
+
+            if (task.options) {
+                task.options.forEach((optText, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = `<b>${optIndex + 1})</b> ${optText}`;
+                    
+                    btn.addEventListener('click', function() {
+                        if (isAnswered) return;
+                        buttonElements.forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedBtn = { button: this, index: optIndex };
+                    });
+
+                    buttonElements.push(btn);
+                    optionsGrid.appendChild(btn);
+                });
+            } else {
+                inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.className = 'text-input';
+                inputElement.placeholder = 'Введите ваш ответ...';
+                optionsGrid.appendChild(inputElement);
+            }
+
+            card.appendChild(optionsGrid);
+
+            const actionsGroup = document.createElement('div');
+            actionsGroup.className = 'actions-group';
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'action-btn check-btn';
+            checkBtn.textContent = 'Проверить ответ';
+
+            const solutionToggleBtn = document.createElement('button');
+            solutionToggleBtn.className = 'action-btn solution-toggle-btn';
+            solutionToggleBtn.textContent = 'Показать решение';
+
+            const solutionBox = document.createElement('div');
+            solutionBox.className = 'solution-box';
+            solutionBox.innerHTML = `<h4>Разбор решения:</h4>${task.solution}`;
+
+            checkBtn.addEventListener('click', () => {
+                if (isAnswered) return;
+                
+                if (task.options) {
+                    if (!selectedBtn) { alert('Пожалуйста, выберите вариант ответа.'); return; }
+                    isAnswered = true;
+                    buttonElements.forEach(btn => btn.disabled = true);
+                    
+                    if (selectedBtn.index === task.correct) {
+                        selectedBtn.button.classList.add('correct');
+                    } else {
+                        selectedBtn.button.classList.add('wrong');
+                        buttonElements[task.correct].classList.add('correct');
+                    }
+                } else {
+                    let userVal = inputElement.value.trim().replace(',', '.');
+                    if (userVal === '') { alert('Пожалуйста, введите ответ в поле.'); return; }
+                    isAnswered = true;
+                    inputElement.disabled = true;
+
+                    if (task.correct.includes(userVal)) {
+                        inputElement.classList.add('correct');
+                    } else {
+                        inputElement.classList.add('wrong');
+                        let correctText = task.correct[0].replace('.', ',');
+                        solutionBox.innerHTML = `<h4>Разбор решения:</h4><p style="color:var(--wrong-color); font-weight:bold;">Правильный ответ: ${correctText}</p>${task.solution}`;
+                    }
+                }
+
+                checkBtn.style.display = 'none';
+                solutionToggleBtn.style.display = 'block';
+                
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([solutionBox]);
+                }
+            });
+
+            solutionToggleBtn.addEventListener('click', () => {
+                if (solutionBox.classList.contains('visible')) {
+                    solutionBox.classList.remove('visible');
+                    solutionToggleBtn.textContent = 'Показать решение';
+                } else {
+                    solutionBox.classList.add('visible');
+                    solutionToggleBtn.textContent = 'Скрыть решение';
+                }
+            });
+
+            actionsGroup.appendChild(checkBtn);
+            actionsGroup.appendChild(solutionToggleBtn);
+            card.appendChild(actionsGroup);
+            card.appendChild(solutionBox);
+            container.appendChild(card);
+        });
+
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err));
+        }
+    </script>
+</body>
+</html>
